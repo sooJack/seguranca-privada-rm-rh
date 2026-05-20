@@ -1,0 +1,294 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sistema de Segurança Privada - API",
+    "description": "API do sistema de gestão de segurança privada - RM/RH",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Suporte",
+      "email": "suporte@seguranca.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Servidor Backend - API Principal"
+    },
+    {
+      "url": "http://localhost:5173",
+      "description": "Servidor Frontend - Vite (Desenvolvimento)"
+    }
+  ],
+  "paths": {
+    "/api/vigilantes": {
+      "get": {
+        "summary": "Listar todos os vigilantes",
+        "tags": ["Vigilantes"],
+        "responses": {
+          "200": {
+            "description": "Lista de vigilantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vigilante"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar novo vigilante",
+        "tags": ["Vigilantes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VigilanteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vigilante criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vigilante"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/postos": {
+      "get": {
+        "summary": "Listar todos os postos",
+        "tags": ["Postos"],
+        "responses": {
+          "200": {
+            "description": "Lista de postos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Posto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/escalas": {
+      "get": {
+        "summary": "Listar todas as escalas",
+        "tags": ["Escalas"],
+        "responses": {
+          "200": {
+            "description": "Lista de escalas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Escala"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ocorrencias": {
+      "get": {
+        "summary": "Listar todas as ocorrências",
+        "tags": ["Ocorrências"],
+        "responses": {
+          "200": {
+            "description": "Lista de ocorrências",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Ocorrencia"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Vigilante": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "example": "João Silva"
+          },
+          "cpf": {
+            "type": "string",
+            "example": "123.456.789-00"
+          },
+          "rg": {
+            "type": "string",
+            "example": "12345678-9"
+          },
+          "data_nascimento": {
+            "type": "string",
+            "format": "date",
+            "example": "1990-05-15"
+          },
+          "endereco": {
+            "type": "string",
+            "example": "Rua A, 123"
+          },
+          "telefone": {
+            "type": "string",
+            "example": "(11) 98765-4321"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "joao@email.com"
+          },
+          "data_admissao": {
+            "type": "string",
+            "format": "date",
+            "example": "2020-01-15"
+          },
+          "salario": {
+            "type": "number",
+            "format": "float",
+            "example": 2500.00
+          }
+        }
+      },
+      "VigilanteInput": {
+        "type": "object",
+        "required": ["nome", "cpf", "rg"],
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "rg": {
+            "type": "string"
+          },
+          "data_nascimento": {
+            "type": "string",
+            "format": "date"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "telefone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "data_admissao": {
+            "type": "string",
+            "format": "date"
+          },
+          "salario": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "Posto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Posto Central"
+          },
+          "localizacao": {
+            "type": "string",
+            "example": "Centro da cidade"
+          },
+          "telefone": {
+            "type": "string"
+          }
+        }
+      },
+      "Escala": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "vigilante_id": {
+            "type": "integer"
+          },
+          "posto_id": {
+            "type": "integer"
+          },
+          "data_inicio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data_fim": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "turno": {
+            "type": "string",
+            "enum": ["matutino", "vespertino", "noturno"]
+          }
+        }
+      },
+      "Ocorrencia": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "vigilante_id": {
+            "type": "integer"
+          },
+          "posto_id": {
+            "type": "integer"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipo": {
+            "type": "string",
+            "example": "Roubo, Vandalismo, Outro"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+/* ============================================================
+   components/layout/Layout.css
+   ============================================================ */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.layout__main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left var(--transition);
+}
+
+.layout--collapsed .layout__main { margin-left: 68px; }
+
+.layout__content {
+  flex: 1;
+  padding: 28px 28px 40px;
+}
+
+.layout__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .layout__main { margin-left: 0; }
+  .layout--collapsed .layout__main { margin-left: 0; }
+  .layout__overlay { display: block; }
+  .layout__content { padding: 20px 16px 32px; }
+}

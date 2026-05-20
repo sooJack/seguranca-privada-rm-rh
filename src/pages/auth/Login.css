@@ -1,0 +1,44 @@
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.login__card { width: 100%; max-width: 420px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-md); }
+.login__logo { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.login__logo-icon { font-size: 34px; }
+.login__logo-title { margin: 0; font-size: 18px; font-weight: 700; }
+.login__logo-sub { margin: 0; font-size: 13px; color: var(--text-muted); }
+.login__welcome { margin: 8px 0 16px; color: var(--text-secondary); }
+.login__vigilantes {
+  margin-bottom: 18px;
+}
+
+.login__vigilantes-list {
+  display: grid;
+  gap: 10px;
+}
+
+.login__vigilante-button {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login__vigilante-button:hover {
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.login__form { display: flex; flex-direction: column; gap: 12px; }
+.login__btn {
+  margin-top: 6px;
+  width: 100%;
+  background-color: #f1293b;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.login__footer { margin-top: 14px; font-size: 12px; color: var(--text-muted); text-align: center; }
+.login__theme-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; }
