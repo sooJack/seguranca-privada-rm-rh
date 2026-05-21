@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { db, testConnection } from './database.js';
+import routes from './routes.js';
 
 dotenv.config();
 
@@ -11,6 +12,9 @@ const PORT = process.env.SERVER_PORT || 3001;
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Rotas da API
+app.use('/api', routes);
 
 // Middleware de logging
 app.use((req, res, next) => {
@@ -146,128 +150,6 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Vigilantes
-app.get('/api/vigilantes', async (req, res) => {
-  try {
-    console.log('🔍 Buscando vigilantes...');
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM vigilantes');
-    connection.release();
-    console.log(`✅ ${rows.length} vigilantes encontrados`);
-    res.json(rows);
-  } catch (error) {
-    console.error('❌ Erro ao buscar vigilantes:', error.message);
-    res.status(500).json({ 
-      error: error.message,
-      codigo: error.code,
-      tabela: 'vigilantes',
-      dica: 'Tabela existe? Scripts SQL foram executados?'
-    });
-  }
-});
-
-app.get('/api/vigilantes/:id', async (req, res) => {
-  try {
-    console.log(`🔍 Buscando vigilante ID ${req.params.id}...`);
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM vigilantes WHERE id_vigilante = ?', [req.params.id]);
-    connection.release();
-    
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Vigilante não encontrado' });
-    }
-    
-    console.log(`✅ Vigilante encontrado: ${rows[0].nome}`);
-    res.json(rows[0]);
-  } catch (error) {
-    console.error('❌ Erro ao buscar vigilante:', error.message);
-    res.status(500).json({ error: error.message, codigo: error.code });
-  }
-});
-
-app.post('/api/vigilantes', async (req, res) => {
-  try {
-    const { nome, cpf, telefone, nivel_treinamento, status_vigilante } = req.body;
-    
-    if (!nome || !cpf) {
-      return res.status(400).json({ error: 'Nome e CPF são obrigatórios' });
-    }
-
-    const connection = await db.getConnection();
-    const [result] = await connection.query(
-      'INSERT INTO vigilantes (nome, cpf, telefone, nivel_treinamento, status_vigilante) VALUES (?, ?, ?, ?, ?)',
-      [nome, cpf, telefone, nivel_treinamento || 'BASICO', status_vigilante || 'ATIVO']
-    );
-    connection.release();
-    
-    console.log(`✅ Vigilante criado: ID ${result.insertId}`);
-    res.status(201).json({ id_vigilante: result.insertId, ...req.body });
-  } catch (error) {
-    console.error('❌ Erro ao criar vigilante:', error.message);
-    res.status(500).json({ error: error.message, codigo: error.code });
-  }
-});
-
-// Clientes
-app.get('/api/clientes', async (req, res) => {
-  try {
-    console.log('🔍 Buscando clientes...');
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM clientes');
-    connection.release();
-    console.log(`✅ ${rows.length} clientes encontrados`);
-    res.json(rows);
-  } catch (error) {
-    console.error('❌ Erro ao buscar clientes:', error.message);
-    res.status(500).json({ error: error.message, codigo: error.code });
-  }
-});
-
-// Postos
-app.get('/api/postos', async (req, res) => {
-  try {
-    console.log('🔍 Buscando postos...');
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM postos');
-    connection.release();
-    console.log(`✅ ${rows.length} postos encontrados`);
-    res.json(rows);
-  } catch (error) {
-    console.error('❌ Erro ao buscar postos:', error.message);
-    res.status(500).json({ error: error.message, codigo: error.code });
-  }
-});
-
-// Escalas
-app.get('/api/escalas', async (req, res) => {
-  try {
-    console.log('🔍 Buscando escalas...');
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM escalas');
-    connection.release();
-    console.log(`✅ ${rows.length} escalas encontradas`);
-    res.json(rows);
-  } catch (error) {
-    console.error('❌ Erro ao buscar escalas:', error.message);
-    res.status(500).json({ error: error.message, codigo: error.code });
-  }
-});
-
-// Ocorrências
-app.get('/api/ocorrencias', async (req, res) => {
-  try {
-    console.log('🔍 Buscando ocorrências...');
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM ocorrencias');
-    connection.release();
-    console.log(`✅ ${rows.length} ocorrências encontradas`);
-    res.json(rows);
-  } catch (error) {
-    console.error('❌ Erro ao buscar ocorrências:', error.message);
-    res.status(500).json({ error: error.message, codigo: error.code });
-  }
-});
-
 // Rota 404
 app.use((req, res) => {
   console.warn(`⚠️ Rota não encontrada: ${req.method} ${req.path}`);
@@ -276,16 +158,35 @@ app.use((req, res) => {
     method: req.method,
     path: req.path,
     endpoints_disponiveis: [
-      'GET /',
-      'GET /api/health',
-      'GET /api/test',
       'GET /api/vigilantes',
-      'GET /api/vigilantes/:id',
       'POST /api/vigilantes',
+      'PUT /api/vigilantes/:id',
+      'DELETE /api/vigilantes/:id',
       'GET /api/clientes',
+      'POST /api/clientes',
+      'PUT /api/clientes/:id',
+      'DELETE /api/clientes/:id',
       'GET /api/postos',
+      'POST /api/postos',
+      'PUT /api/postos/:id',
+      'DELETE /api/postos/:id',
       'GET /api/escalas',
-      'GET /api/ocorrencias'
+      'POST /api/escalas',
+      'PUT /api/escalas/:id',
+      'DELETE /api/escalas/:id',
+      'GET /api/ocorrencias',
+      'POST /api/ocorrencias',
+      'DELETE /api/ocorrencias/:id',
+      'GET /api/ferias',
+      'POST /api/ferias',
+      'DELETE /api/ferias/:id',
+      'GET /api/horas-extras',
+      'POST /api/horas-extras',
+      'DELETE /api/horas-extras/:id',
+      'GET /api/riscos',
+      'POST /api/riscos',
+      'PUT /api/riscos/:id',
+      'DELETE /api/riscos/:id'
     ]
   });
 });
@@ -299,7 +200,7 @@ const startServer = async () => {
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-    console.log(`📚 Swagger Docs: http://localhost:5173/api-docs`);
+    console.log(`📚 API Endpoints disponíveis em http://localhost:${PORT}/api`);
     console.log(`🌐 Frontend: http://localhost:5173/`);
     console.log('');
   });

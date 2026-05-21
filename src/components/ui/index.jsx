@@ -119,3 +119,50 @@ export function EmptyState({ icon = "📭", title, description, action }) {
     </div>
   );
 }
+
+/* ── DIALOG ──────────────────────────────────────────────────── */
+export function Dialog({ open, onOpenChange, children }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function DialogTrigger({ asChild, children, onClick }) {
+  if (asChild) return children;
+  return <button onClick={onClick}>{children}</button>;
+}
+
+export function DialogContent({ children, onOpenChange, className = "" }) {
+  return <div className={`dialog-content ${className}`}>{children}</div>;
+}
+
+export function DialogHeader({ children }) {
+  return <div className="dialog-header mb-4">{children}</div>;
+}
+
+export function DialogTitle({ children }) {
+  return <h2 className="text-xl font-bold">{children}</h2>;
+}
+
+export function DialogDescription({ children }) {
+  return <p className="text-gray-600 text-sm mt-1">{children}</p>;
+}
+
+export function DialogFooter({ children }) {
+  return <div className="dialog-footer mt-6 flex gap-2 justify-end">{children}</div>;
+}
+
+export function DialogClose({ children, onClick, asChild = true }) {
+  if (asChild) return children;
+  return <button onClick={onClick}>{children}</button>;
+}
+
+/* ── LABEL ───────────────────────────────────────────────────── */
+export function Label({ children, className = "" }) {
+  return <label className={`block text-sm font-medium text-gray-700 mb-2 ${className}`}>{children}</label>;
+}
