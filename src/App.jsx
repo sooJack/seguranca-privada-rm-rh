@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { useLanguage } from "./context/LanguageContext";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
@@ -16,9 +17,10 @@ import "./App.css";
 
 function ProtectedRoute({ children }) {
   const { autenticado, carregando } = useAuth();
+  const { t } = useLanguage();
 
   if (carregando) {
-    return <div className="page-shell">Carregando sessão...</div>;
+    return <div className="page-shell">{t("common.loading")}</div>;
   }
 
   return autenticado ? children : <Navigate to="/login" replace />;

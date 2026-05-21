@@ -41,12 +41,19 @@
 
 .topbar__actions { display: flex; align-items: center; gap: 8px; }
 
+.topbar__language-toggle {
+  display: flex; align-items: center; gap: 6px; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 99px; transition: all var(--transition);
+}
+
+.topbar__language-toggle:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+
 .topbar__theme-toggle {
   display: flex; align-items: center; gap: 6px; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 99px; transition: all var(--transition);
 }
 
 .topbar__theme-toggle:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
 
+.topbar__language-label { display: none; }
 .topbar__theme-label { display: none; }
 
 @media (min-width: 600px) { .topbar__theme-label { display: inline; } }

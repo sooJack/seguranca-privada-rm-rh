@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import { FaLightbulb } from "react-icons/fa";
 import { Lightbulb, LightbulbFilament } from "phosphor-react";
+import { LiaFlagUsaSolid } from "react-icons/lia";
+import { GiBrazilFlag } from "react-icons/gi";
 import { SiSpringsecurity } from "react-icons/si";
 import { AiOutlineSecurityScan } from "react-icons/ai";
 import { AiOutlineFileProtect } from "react-icons/ai";
@@ -17,9 +20,11 @@ import { MdOutlineWorkHistory } from "react-icons/md";
 export default function LandingPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage, t } = useLanguage();
   const [loaded, setLoaded] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
   const canvasRef = useRef(null);
+  const isEnglish = language === "en-US";
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 100);
@@ -100,19 +105,19 @@ export default function LandingPage() {
   }, []);
 
   const features = [
-    { icon: <AiOutlineFileProtect />, title: "Proteção Total", desc: "Sistema de vigilância integrado com monitoramento 24/7" },
-    { icon: <RxDashboard />, title: "Dashboard em Tempo Real", desc: "Acompanhe todas as operações com dados ao vivo" },
-    { icon: <CgController />, title: "Controle de Acesso", desc: "Registro biométrico e controle de entrada/saída" },
-    { icon: <AiOutlineThunderbolt />, title: "Resposta Rápida", desc: "Ocorrências registradas e tratadas em segundos" },
-    { icon: <BsDatabaseLock />, title: "Dados Criptografados", desc: "Todas as informações protegidas com criptografia avançada" },
-    { icon: <MdOutlineWorkHistory />, title: "Escalas Automatizadas", desc: "Gestão inteligente de turnos e escalas de serviço" },
+    { icon: <AiOutlineFileProtect />, title: t("landing.features.totalProtection"), desc: t("landing.features.totalProtectionDesc") },
+    { icon: <RxDashboard />, title: t("landing.features.realtimeDashboard"), desc: t("landing.features.realtimeDashboardDesc") },
+    { icon: <CgController />, title: t("landing.features.accessControl"), desc: t("landing.features.accessControlDesc") },
+    { icon: <AiOutlineThunderbolt />, title: t("landing.features.quickResponse"), desc: t("landing.features.quickResponseDesc") },
+    { icon: <BsDatabaseLock />, title: t("landing.features.encryptedData"), desc: t("landing.features.encryptedDataDesc") },
+    { icon: <MdOutlineWorkHistory />, title: t("landing.features.automatedSchedules"), desc: t("landing.features.automatedSchedulesDesc") },
   ];
 
   const stats = [
-    { value: "99.9%", label: "Disponibilidade" },
-    { value: "<1s", label: "Tempo de Resposta" },
-    { value: "AES-256", label: "Criptografia" },
-    { value: "24/7", label: "Monitoramento" },
+    { value: "99.9%", label: t("landing.availability") },
+    { value: "<1s", label: t("landing.responseTime") },
+    { value: "AES-256", label: t("landing.encryption") },
+    { value: "24/7", label: t("landing.monitoring") },
   ];
 
   return (
@@ -129,34 +134,36 @@ export default function LandingPage() {
         </div>
 
         <div className="landing-header-actions">
-          <button className="theme-toggle" onClick={toggleTheme} title="Alternar tema">
+          <button className="theme-toggle" onClick={toggleLanguage} title={t("topbar.changeLanguage")}>
+            {isEnglish ? <LiaFlagUsaSolid size={20} /> : <GiBrazilFlag size={20} />}
+          </button>
+          <button className="theme-toggle" onClick={toggleTheme} title={theme === "dark" ? t("topbar.lightMode") : t("topbar.darkMode")}>
             {theme === "dark" ? <LightbulbFilament size={20} /> : <Lightbulb size={20} />}
           </button>
-          <button className="btn btn-outline" onClick={() => navigate("/login")}>Acessar Sistema</button>
+          <button className="btn btn-outline" onClick={() => navigate("/login")}>{t("landing.accessSystem")}</button>
         </div>
       </header>
 
       <section className="landing-hero">
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          Sistema Ativo · Operacional
+          {t("common.systemActive")}
         </div>
 
         <h1 className="hero-title">
-          <span className="hero-title-line1">AEGIS</span>
-          <span className="hero-title-line2">Dynamics</span>
-          <span className="hero-title-line3">Security</span>
+          <span className="hero-title-line1">{t("landing.heroTitle1")}</span>
+          <span className="hero-title-line2">{t("landing.heroTitle2")}</span>
+          <span className="hero-title-line3">{t("landing.heroTitle3")}</span>
         </h1>
 
         <p className="hero-subtitle">
-          Plataforma de gestão avançada para segurança privada.<br />
-          Controle vigilantes, escalas e ocorrências com precisão absoluta.
+          {t("landing.heroSubtitle")}
         </p>
 
         <div className="hero-actions">
           <button className="btn btn-primary btn-lg" onClick={() => navigate("/login")}>
             <AiOutlineSecurityScan size={40} />
-            Entrar no Sistema
+            {t("landing.enterSystem")}
           </button>
         </div>
 
@@ -171,7 +178,7 @@ export default function LandingPage() {
       </section>
 
       <section className="landing-features">
-        <h2 className="features-title"><span className="accent">Módulos</span> do Sistema</h2>
+        <h2 className="features-title"><span className="accent">{t("landing.modulesAccent")}</span> do Sistema</h2>
         <div className="features-grid">
           {features.map((feature, index) => (
             <div
@@ -191,11 +198,11 @@ export default function LandingPage() {
       <section className="landing-cta">
         <div className="cta-box">
           <div className="cta-icon"><SiSpringsecurity size={32} /></div>
-          <h2 className="cta-title">Pronto para começar?</h2>
+          <h2 className="cta-title">{t("landing.ctaTitle")}</h2>
           <p className="cta-desc">
-            Faça login com seu nome e CPF para acessar o painel de controle operacional.
+            {t("landing.ctaDesc")}
           </p>
-          <button className="btn btn-primary btn-lg" onClick={() => navigate("/login")}>Acessar Agora →</button>
+          <button className="btn btn-primary btn-lg" onClick={() => navigate("/login")}>{t("landing.accessNow")}</button>
         </div>
       </section>
 
@@ -206,8 +213,8 @@ export default function LandingPage() {
           </span>
           <span className="footer-brand">AEGIS Dynamics Security</span>
         </div>
-        <p className="footer-copy">© {new Date().getFullYear()} AEGIS Dynamics Security. Todos os direitos reservados.</p>
-        <p className="footer-legal">Sistema de uso interno. Acesso não autorizado é crime nos termos da Lei nº 12.737/2012.</p>
+        <p className="footer-copy">{t("landing.footerCopy")}</p>
+        <p className="footer-legal">{t("landing.footerLegal")}</p>
       </footer>
     </div>
   );

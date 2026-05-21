@@ -8,8 +8,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { SiStackhawk } from "react-icons/si";
 import { FaLightbulb } from "react-icons/fa";
 import { Lightbulb, LightbulbFilament } from "phosphor-react";
+import { LiaFlagUsaSolid } from "react-icons/lia";
+import { GiBrazilFlag } from "react-icons/gi";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
 import { Input, Button, Alert } from "../../components/ui";
 import "./Login.css";
@@ -17,9 +20,11 @@ import "./Login.css";
 export default function Login() {
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage, t } = useLanguage();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const isEnglish = language === "en-US";
 
   const [form, setForm] = useState({
     nome: location.state?.nome || "",
@@ -33,9 +38,9 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.nome || !form.cpf) {
-      const message = "Preencha nome e CPF.";
+      const message = t("forms.filledBoth");
       setErro(message);
-      toast.warning("Campos obrigatórios", message);
+      toast.warning(t("forms.required"), message);
       return;
     }
     setErro("");
@@ -45,7 +50,7 @@ export default function Login() {
       toast.success("Login efetuado", "Bem-vindo ao painel de gestão.");
       navigate("/dashboard");
     } catch (err) {
-      const message = err.response?.data?.mensagem || err.message || "Credenciais inválidas. Tente novamente.";
+      const message = err.response?.data?.mensagem || err.message || t("login.error");
       setErro(message);
       toast.error("Falha no login", message);
     } finally {
@@ -55,10 +60,15 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      {/* Botão tema */}
-      <button className="login__theme-btn" onClick={toggleTheme} title="Alternar tema">
-        {theme === "dark" ? <LightbulbFilament size={20} /> : <Lightbulb size={20} />}
-      </button>
+      {/* Botões de controle */}
+      <div className="login__controls">
+        <button className="login__theme-btn" onClick={toggleLanguage} title={t("topbar.changeLanguage")}>
+          {isEnglish ? <LiaFlagUsaSolid size={20} /> : <GiBrazilFlag size={20} />}
+        </button>
+        <button className="login__theme-btn" onClick={toggleTheme} title={theme === "dark" ? t("topbar.lightMode") : t("topbar.darkMode")}>
+          {theme === "dark" ? <LightbulbFilament size={20} /> : <Lightbulb size={20} />}
+        </button>
+      </div>
 
       <div className="login__card">
         {/* Logo */}
@@ -66,11 +76,11 @@ export default function Login() {
           <span className="login__logo-icon"><SiStackhawk size={28} /></span>
           <div>
             <h1 className="login__logo-title">AEGIS DYNAMICS SECURITY</h1>
-            <p className="login__logo-sub">Sistema AEGIS</p>
+            <p className="login__logo-sub">{t("login.systemInfo")}</p>
           </div>
         </div>
 
-        <p className="login__welcome">Bem-vindo! Faça login para continuar.</p>
+        <p className="login__welcome">{t("login.welcome")}</p>
 
         {/* Feedback de erro */}
         {erro && <Alert type="error" onClose={() => setErro("")}>{erro}</Alert>}
@@ -78,22 +88,22 @@ export default function Login() {
         {/* Formulário */}
         <form className="login__form" onSubmit={handleSubmit} noValidate>
           <Input
-            label="Nome"
+            label={t("login.name")}
             type="text"
             name="nome"
             value={form.nome}
             onChange={handleChange}
-            placeholder="Seu nome completo"
+            placeholder={t("login.namePlaceholder")}
             autoComplete="name"
             required
           />
           <Input
-            label="CPF"
+            label={t("login.cpf")}
             type="text"
             name="cpf"
             value={form.cpf}
             onChange={handleChange}
-            placeholder="000.000.000-00"
+            placeholder={t("login.cpfPlaceholder")}
             autoComplete="username"
             required
           />
@@ -104,13 +114,11 @@ export default function Login() {
             loading={carregando}
             className="login__btn"
           >
-            Entrar
+            {t("login.login")}
           </Button>
         </form>
 
-        <p className="login__footer">
-          Sistema de uso exclusivo da equipe autorizada.
-        </p>
+        <p className="login__info">{t("login.exclusive")}</p>
       </div>
     </div>
   );
