@@ -1,7 +1,7 @@
 .landing {
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   background: var(--landing-bg);
   color: var(--landing-text);
   padding: 32px 48px;
@@ -46,12 +46,6 @@
   transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), #ff4d4d);
-  border-color: transparent;
-  color: #fff;
-}
-
 .btn-outline {
   background: transparent;
   border-color: var(--landing-border);
@@ -60,11 +54,17 @@
 .landing-hero {
   display: grid;
   gap: 32px;
-  padding: 56px 32px;
-  border-radius: 32px;
+  /* expand horizontal full-bleed while keeping top corners rounded */
+  width: calc(100% + 96px);
+  max-width: none;
+  margin-left: -48px;
+  margin-right: -48px;
+  padding: 72px 32px 56px; /* extra top padding to avoid overlap with badge */
+  border-radius: 32px 32px 0 0;
   background: var(--landing-surface-strong);
   border: 1px solid var(--landing-border);
   box-shadow: var(--landing-shadow);
+  position: relative;
 }
 
 .hero-badge {
@@ -235,12 +235,6 @@
   transform: translateY(-1px);
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), #ff4d4d);
-  border-color: transparent;
-  color: #fff;
-}
-
 .btn-outline {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.22);
@@ -254,11 +248,16 @@
 .landing-hero {
   display: grid;
   gap: 32px;
-  padding: 56px 32px;
-  border-radius: 32px;
+  width: calc(100% + 96px);
+  max-width: none;
+  margin-left: -48px;
+  margin-right: -48px;
+  padding: 72px 32px 56px;
+  border-radius: 32px 32px 0 0;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--shadow);
+  position: relative;
 }
 
 .hero-badge {
@@ -271,6 +270,10 @@
   color: var(--text-muted);
   font-size: 0.85rem;
   letter-spacing: 0.08em;
+  position: absolute;
+  top: 20px;
+  left: 48px;
+  z-index: 30;
 }
 
 .hero-badge-dot {
@@ -311,7 +314,7 @@
 .hero-actions {
   color: #f1293b;
   display: flex;
-  align-items: cen
+  align-items: center;
 }
 
 .hero-stats {
@@ -345,11 +348,11 @@
 .features-title {
   margin-bottom: 24px;
   font-size: 1.25rem;
-  color: var(--text-strong);
+  color: white;
 }
 
 .features-title .accent {
-  color: var(--accent);
+  color: #f1293b;
 }
 
 .features-grid {
@@ -414,15 +417,15 @@
   height: 48px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: rgba(209, 0, 0, 0.16);
-  color: var(--accent);
+  border-radius: black;
+  color: white;
   font-size: 1.35rem;
 }
 
 .cta-title {
   font-size: 1.8rem;
   margin: 0;
+  color: #f1293b;
 }
 
 .cta-desc {

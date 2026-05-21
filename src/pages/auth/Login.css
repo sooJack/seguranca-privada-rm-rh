@@ -2,7 +2,12 @@
 .login__card { width: 100%; max-width: 420px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-md); }
 .login__logo { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
 .login__logo-icon { font-size: 34px; }
-.login__logo-title { margin: 0; font-size: 18px; font-weight: 700; }
+.login__logo-title { 
+  margin: 0; 
+  font-size: 18px; 
+  font-weight: 700;
+  color: #f1293b;
+}
 .login__logo-sub { margin: 0; font-size: 13px; color: var(--text-muted); }
 .login__welcome { margin: 8px 0 16px; color: var(--text-secondary); }
 .login__vigilantes {

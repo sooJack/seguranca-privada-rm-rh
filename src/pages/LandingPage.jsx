@@ -6,6 +6,13 @@ import { FaLightbulb } from "react-icons/fa";
 import { Lightbulb, LightbulbFilament } from "phosphor-react";
 import { SiSpringsecurity } from "react-icons/si";
 import { AiOutlineSecurityScan } from "react-icons/ai";
+import { AiOutlineFileProtect } from "react-icons/ai";
+import { RxDashboard } from "react-icons/rx";
+import { CgController } from "react-icons/cg";
+import { AiOutlineThunderbolt } from "react-icons/ai";
+import { BsDatabaseLock } from "react-icons/bs";
+import { MdOutlineWorkHistory } from "react-icons/md";
+
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -93,12 +100,12 @@ export default function LandingPage() {
   }, []);
 
   const features = [
-    { icon: "🛡", title: "Proteção Total", desc: "Sistema de vigilância integrado com monitoramento 24/7" },
-    { icon: "📊", title: "Dashboard em Tempo Real", desc: "Acompanhe todas as operações com dados ao vivo" },
-    { icon: "👁", title: "Controle de Acesso", desc: "Registro biométrico e controle de entrada/saída" },
-    { icon: "⚡", title: "Resposta Rápida", desc: "Ocorrências registradas e tratadas em segundos" },
-    { icon: "🔐", title: "Dados Criptografados", desc: "Todas as informações protegidas com criptografia avançada" },
-    { icon: "📋", title: "Escalas Automatizadas", desc: "Gestão inteligente de turnos e escalas de serviço" },
+    { icon: <AiOutlineFileProtect />, title: "Proteção Total", desc: "Sistema de vigilância integrado com monitoramento 24/7" },
+    { icon: <RxDashboard />, title: "Dashboard em Tempo Real", desc: "Acompanhe todas as operações com dados ao vivo" },
+    { icon: <CgController />, title: "Controle de Acesso", desc: "Registro biométrico e controle de entrada/saída" },
+    { icon: <AiOutlineThunderbolt />, title: "Resposta Rápida", desc: "Ocorrências registradas e tratadas em segundos" },
+    { icon: <BsDatabaseLock />, title: "Dados Criptografados", desc: "Todas as informações protegidas com criptografia avançada" },
+    { icon: <MdOutlineWorkHistory />, title: "Escalas Automatizadas", desc: "Gestão inteligente de turnos e escalas de serviço" },
   ];
 
   const stats = [

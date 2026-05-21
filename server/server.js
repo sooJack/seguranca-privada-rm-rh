@@ -8,6 +8,8 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.SERVER_PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const OPENAPI_JSON_PATH = new URL('../src/swagger/openapi.json', import.meta.url);
 
 // Middlewares
 app.use(cors());
@@ -31,14 +33,16 @@ app.get('/', (req, res) => {
       contador: 'GET /api',
       health: 'GET /api/health',
       test: 'GET /api/test',
+      api_docs: 'GET /api-docs',
+      openapi_json: 'GET /api/openapi.json',
       vigilantes: 'GET /api/vigilantes',
       clientes: 'GET /api/clientes',
       postos: 'GET /api/postos',
       escalas: 'GET /api/escalas',
       ocorrencias: 'GET /api/ocorrencias'
     },
-    docs: 'http://localhost:5173/api-docs',
-    frontend: 'http://localhost:5173/'
+    docs: `http://localhost:${PORT}/api-docs`,
+    frontend: FRONTEND_URL
   });
 });
 
@@ -60,9 +64,50 @@ app.get('/api', (req, res) => {
       ocorrencias: 'GET /api/ocorrencias',
       login: 'POST /api/auth/login'
     },
-    docs: 'http://localhost:5173/api-docs',
-    frontend: 'http://localhost:5173/'
+    docs: `http://localhost:${PORT}/api-docs`,
+    frontend: FRONTEND_URL
   });
+});
+
+app.get('/api-docs', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swagger UI - Segurança Privada</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.32.6/swagger-ui.css" />
+    <style>
+      body { margin: 0; padding: 0; }
+      #swagger-ui { width: 100vw; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.32.6/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.32.6/swagger-ui-standalone-preset.js"></script>
+    <script>
+      window.onload = function () {
+        SwaggerUIBundle({
+          url: '/api/openapi.json',
+          dom_id: '#swagger-ui',
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          layout: 'StandaloneLayout',
+          validatorUrl: null,
+          docExpansion: 'none',
+          deepLinking: true
+        });
+      };
+    </script>
+  </body>
+</html>`);
+});
+
+app.get('/api/openapi.json', (req, res) => {
+  res.sendFile(OPENAPI_JSON_PATH);
 });
 
 // Teste de conexão
@@ -199,9 +244,12 @@ const startServer = async () => {
   }
 
   app.listen(PORT, () => {
+    console.log('✅ Conectado ao banco de dados!');
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
     console.log(`📚 API Endpoints disponíveis em http://localhost:${PORT}/api`);
-    console.log(`🌐 Frontend: http://localhost:5173/`);
+    console.log(`📄 Swagger UI local: http://localhost:${PORT}/api-docs`);
+    console.log(`📘 OpenAPI JSON: http://localhost:${PORT}/api/openapi.json`);
+    console.log(`🌐 Frontend: ${FRONTEND_URL}/`);
     console.log('');
   });
 };
