@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 import { db, testConnection } from './database.js';
 import routes from './routes.js';
 
@@ -9,7 +10,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.SERVER_PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const OPENAPI_JSON_PATH = new URL('../src/swagger/openapi.json', import.meta.url);
+const OPENAPI_JSON_PATH = fileURLToPath(new URL('../src/swagger/openapi.json', import.meta.url));
 
 // Middlewares
 app.use(cors());
