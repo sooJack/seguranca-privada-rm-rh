@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Component, useState, useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
 import { useLanguage } from "./context/LanguageContext";
@@ -60,7 +60,10 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   const { autenticado } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
+  const location = useLocation();
+  const route = location.hash.replace(/^#/, "") || "/";
+  const [showSplash, setShowSplash] = useState(() => route === "/");
+  const logoSrc = `${import.meta.env.BASE_URL}file.png`;
 
   useEffect(() => {
     document.body.style.overflow = showSplash ? "hidden" : "";
@@ -70,9 +73,14 @@ export default function App() {
   }, [showSplash]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setShowSplash(false), 2600);
-    return () => clearTimeout(timeout);
-  }, []);
+    const route = location.hash.replace(/^#/, "") || "/";
+    if (route === "/") {
+      setShowSplash(true);
+      const timeout = setTimeout(() => setShowSplash(false), 2600);
+      return () => clearTimeout(timeout);
+    }
+    setShowSplash(false);
+  }, [location.hash]);
 
   return (
     <ErrorBoundary>
@@ -80,7 +88,7 @@ export default function App() {
         <div className="splash-screen">
           <div className="splash-glow" />
           <div className="splash-content">
-            <img src="/file.png" alt="Logo do site" className="splash-logo-image" />
+            <img src={logoSrc} alt="Logo do site" className="splash-logo-image" />
             <div className="splash-logo-text">AEGIS DYNAMICS SECURITY</div>
           </div>
           <div className="splash-tag">Segurança privada reforçada</div>
