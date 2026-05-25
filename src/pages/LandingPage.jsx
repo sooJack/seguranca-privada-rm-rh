@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import fileLogo from "../../public/file.png";
 import "./LandingPage.css";
 import { FaLightbulb } from "react-icons/fa";
 import { Lightbulb, LightbulbFilament } from "phosphor-react";
@@ -126,7 +127,7 @@ export default function LandingPage() {
 
       <header className="landing-header">
         <div className="landing-logo">
-          <img src="/file.png" alt="AEGIS" className="logo-image" />
+          <img src={fileLogo} alt="AEGIS" className="logo-image" />
           <div>
             <span className="logo-name">AEGIS</span>
             <span className="logo-sub">DYNAMICS SECURITY</span>
@@ -209,7 +210,7 @@ export default function LandingPage() {
       <footer className="landing-footer">
         <div className="footer-logo">
           <span className="logo-shield small">
-            <img src="/file.png" alt="AEGIS" className="logo-image" />
+            <img src={fileLogo} alt="AEGIS" className="logo-image" />
           </span>
           <span className="footer-brand">AEGIS Dynamics Security</span>
         </div>
