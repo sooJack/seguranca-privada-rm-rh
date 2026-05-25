@@ -230,3 +230,101 @@
     width: 100%;
   }
 }
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #000;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  animation: splashScreenFade 2.6s ease forwards;
+}
+
+.splash-screen::before,
+.splash-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.splash-screen::before {
+  background: radial-gradient(circle at top left, rgba(209, 0, 0, 0.25), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(209, 0, 0, 0.16), transparent 20%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0) 8px 12px);
+}
+
+.splash-screen::after {
+  background-image: linear-gradient(120deg, transparent 45%, rgba(209, 0, 0, 0.14) 46%, rgba(209, 0, 0, 0.08) 48%, transparent 50%),
+    linear-gradient(60deg, transparent 45%, rgba(209, 0, 0, 0.16) 46%, rgba(209, 0, 0, 0.10) 48%, transparent 50%);
+  opacity: 0.5;
+  transform: rotate(6deg);
+}
+
+.splash-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(209, 0, 0, 0.2), transparent 30%);
+  filter: blur(15px);
+}
+
+.splash-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 28px;
+}
+
+.splash-logo-image {
+  width: clamp(100px, 18vw, 180px);
+  max-width: 220px;
+  filter: drop-shadow(0 0 20px rgba(209, 0, 0, 0.35));
+}
+
+.splash-logo-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(209, 0, 0, 0.45);
+}
+
+.splash-tag {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-body);
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.84rem;
+  padding: 10px 24px;
+  border: 1px solid rgba(209, 0, 0, 0.22);
+  border-radius: 999px;
+  box-shadow: 0 0 24px rgba(209, 0, 0, 0.12);
+}
+
+@keyframes splashScreenFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
