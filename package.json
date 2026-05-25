@@ -2,6 +2,7 @@
   "name": "portfolio",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://soojack.github.io/seguranca-privada-rm-rh/",
   "type": "module",
   "scripts": {
     "start": "npm run dev",

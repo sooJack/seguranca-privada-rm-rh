@@ -14,16 +14,22 @@ export function AuthProvider({ children }) {
 
   // Verifica sessão ao inicializar
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      authService
-        .me()
-        .then((res) => setUsuario(res.data))
-        .catch(() => localStorage.removeItem("token"))
-        .finally(() => setCarregando(false));
-    } else {
-      setCarregando(false);
-    }
+    const verificarSessao = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const res = await authService.me();
+          setUsuario(res.data);
+        }
+      } catch (erro) {
+        console.error("Erro ao verificar sessão:", erro);
+        localStorage.removeItem("token");
+      } finally {
+        setCarregando(false);
+      }
+    };
+    
+    verificarSessao();
   }, []);
 
   const login = async (credentials) => {

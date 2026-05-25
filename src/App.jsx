@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Component } from "react";
 import { useAuth } from "./context/AuthContext";
 import { useLanguage } from "./context/LanguageContext";
 import LandingPage from "./pages/LandingPage";
@@ -15,6 +16,37 @@ import { SwaggerDocs } from "./components/SwaggerDocs";
 import "./styles/global.css";
 import "./App.css";
 
+// Error Boundary para evitar tela branca
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Erro crítico:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <h1>Erro ao carregar</h1>
+          <p>Desculpe, ocorreu um erro. Recarregue a página.</p>
+          <button onClick={() => window.location.reload()} style={{ padding: "0.5rem 1rem" }}>
+            Recarregar
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function ProtectedRoute({ children }) {
   const { autenticado, carregando } = useAuth();
   const { t } = useLanguage();
@@ -30,8 +62,9 @@ export default function App() {
   const { autenticado } = useAuth();
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={autenticado ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/api-docs" element={<SwaggerDocs />} />
       <Route
@@ -106,5 +139,6 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </ErrorBoundary>
   );
 }
