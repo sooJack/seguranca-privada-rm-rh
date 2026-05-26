@@ -51,6 +51,33 @@ export const funcionariosService = {
   excluir: (id) => api.delete(`/funcionarios/${id}`),
 };
 
+// ─── VIGILANTES ──────────────────────────────────────────────
+export const vigilantesService = {
+  listar: (params) => api.get("/vigilantes", { params }),
+  buscarPorId: (id) => api.get(`/vigilantes/${id}`),
+  criar: (dados) => api.post("/vigilantes", dados),
+  atualizar: (id, dados) => api.put(`/vigilantes/${id}`, dados),
+  excluir: (id) => api.delete(`/vigilantes/${id}`),
+};
+
+// ─── CLIENTES ────────────────────────────────────────────────
+export const clientesService = {
+  listar: (params) => api.get("/clientes", { params }),
+  buscarPorId: (id) => api.get(`/clientes/${id}`),
+  criar: (dados) => api.post("/clientes", dados),
+  atualizar: (id, dados) => api.put(`/clientes/${id}`, dados),
+  excluir: (id) => api.delete(`/clientes/${id}`),
+};
+
+// ─── POSTOS ──────────────────────────────────────────────────
+export const postosService = {
+  listar: (params) => api.get("/postos", { params }),
+  buscarPorId: (id) => api.get(`/postos/${id}`),
+  criar: (dados) => api.post("/postos", dados),
+  atualizar: (id, dados) => api.put(`/postos/${id}`, dados),
+  excluir: (id) => api.delete(`/postos/${id}`),
+};
+
 // ─── ESCALAS (RM — Resource Management) ─────────────────────
 export const escalasService = {
   listar: (params) => api.get("/escalas", { params }),
@@ -67,6 +94,33 @@ export const ocorrenciasService = {
   criar: (dados) => api.post("/ocorrencias", dados),
   atualizar: (id, dados) => api.put(`/ocorrencias/${id}`, dados),
   excluir: (id) => api.delete(`/ocorrencias/${id}`),
+};
+
+// ─── FÉRIAS ──────────────────────────────────────────────────
+export const feriasService = {
+  listar: (params) => api.get("/ferias", { params }),
+  buscarPorId: (id) => api.get(`/ferias/${id}`),
+  criar: (dados) => api.post("/ferias", dados),
+  atualizar: (id, dados) => api.put(`/ferias/${id}`, dados),
+  excluir: (id) => api.delete(`/ferias/${id}`),
+};
+
+// ─── HORAS EXTRAS ────────────────────────────────────────────
+export const horasExtrasService = {
+  listar: (params) => api.get("/horas-extras", { params }),
+  buscarPorId: (id) => api.get(`/horas-extras/${id}`),
+  criar: (dados) => api.post("/horas-extras", dados),
+  atualizar: (id, dados) => api.put(`/horas-extras/${id}`, dados),
+  excluir: (id) => api.delete(`/horas-extras/${id}`),
+};
+
+// ─── RISCOS (Gestão de Riscos RM) ────────────────────────────
+export const riscosService = {
+  listar: (params) => api.get("/riscos", { params }),
+  buscarPorId: (id) => api.get(`/riscos/${id}`),
+  criar: (dados) => api.post("/riscos", dados),
+  atualizar: (id, dados) => api.put(`/riscos/${id}`, dados),
+  excluir: (id) => api.delete(`/riscos/${id}`),
 };
 
 export default api;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Badge, Dialog, Button, Input, Select, Label } from "../components/ui";
 import { Trash2, Edit2, Plus } from "lucide-react";
+import { vigilantesService } from "../services/api";
 
 export default function Vigilantes() {
   const [vigilantes, setVigilantes] = useState([]);
@@ -22,8 +23,7 @@ export default function Vigilantes() {
 
   const carregarVigilantes = async () => {
     try {
-      const response = await fetch("/api/vigilantes");
-      const data = await response.json();
+      const { data } = await vigilantesService.listar();
       setVigilantes(data || []);
     } catch (error) {
       console.error("Erro ao carregar vigilantes:", error);
@@ -55,18 +55,13 @@ export default function Vigilantes() {
   // Salvar vigilante
   const salvar = async () => {
     try {
-      const url = editingId ? `/api/vigilantes/${editingId}` : "/api/vigilantes";
-      const method = editingId ? "PUT" : "POST";
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setOpenModal(false);
-        carregarVigilantes();
+      if (editingId) {
+        await vigilantesService.atualizar(editingId, formData);
+      } else {
+        await vigilantesService.criar(formData);
       }
+      setOpenModal(false);
+      carregarVigilantes();
     } catch (error) {
       console.error("Erro ao salvar:", error);
     }
@@ -76,12 +71,8 @@ export default function Vigilantes() {
   const deletar = async (id) => {
     if (confirm("Tem certeza?")) {
       try {
-        const response = await fetch(`/api/vigilantes/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          carregarVigilantes();
-        }
+        await vigilantesService.excluir(id);
+        carregarVigilantes();
       } catch (error) {
         console.error("Erro ao deletar:", error);
       }
@@ -126,35 +117,105 @@ export default function Vigilantes() {
       {loading ? (
         <div className="text-center py-8">Carregando vigilantes...</div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
           {vigilantes.map((vigilante) => (
             <div
               key={vigilante.id_vigilante}
-              className="border rounded-lg p-4 hover:shadow-md transition-shadow flex justify-between items-center"
+              style={{
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.5rem',
+                backgroundColor: 'var(--bg-surface)',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'all var(--transition)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
               <div>
-                <h3 className="font-semibold">{vigilante.nome}</h3>
-                <p className="text-sm text-gray-600">CPF: {vigilante.cpf}</p>
-                <p className="text-sm text-gray-600">📱 {vigilante.telefone}</p>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600' }}>
+                  {vigilante.nome}
+                </h3>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <Badge className={getNivelColor(vigilante.nivel_treinamento)}>
+                    {vigilante.nivel_treinamento}
+                  </Badge>
+                  <Badge className={getStatusColor(vigilante.status_vigilante)}>
+                    {vigilante.status_vigilante}
+                  </Badge>
+                </div>
               </div>
-              <div className="flex gap-2 items-center">
-                <Badge className={getNivelColor(vigilante.nivel_treinamento)}>
-                  {vigilante.nivel_treinamento}
-                </Badge>
-                <Badge className={getStatusColor(vigilante.status_vigilante)}>
-                  {vigilante.status_vigilante}
-                </Badge>
+
+              <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                <div>📋 CPF: <strong>{vigilante.cpf}</strong></div>
+                <div>📱 Tel: <strong>{vigilante.telefone || 'N/A'}</strong></div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                 <button
                   onClick={() => editar(vigilante)}
-                  className="p-2 hover:bg-blue-50 rounded"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--bg-page)',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    fontWeight: '500',
+                    transition: 'all var(--transition)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--primary)';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--bg-page)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }}
                 >
-                  <Edit2 size={18} />
+                  <Edit2 size={16} /> Editar
                 </button>
                 <button
                   onClick={() => deletar(vigilante.id_vigilante)}
-                  className="p-2 hover:bg-red-50 rounded text-red-600"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid rgba(209, 0, 0, 0.3)',
+                    backgroundColor: 'rgba(209, 0, 0, 0.08)',
+                    color: 'var(--primary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    fontWeight: '500',
+                    transition: 'all var(--transition)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--primary)';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(209, 0, 0, 0.08)';
+                    e.currentTarget.style.color = 'var(--primary)';
+                  }}
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} /> Deletar
                 </button>
               </div>
             </div>

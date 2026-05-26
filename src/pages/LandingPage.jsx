@@ -162,7 +162,7 @@ export default function LandingPage() {
         </p>
 
         <div className="hero-actions">
-          <button className="btn btn-primary btn-lg" onClick={() => navigate("/login")}>
+          <button className="btn btn-primary btn-lg" onClick={() => navigate("/login") }>
             <AiOutlineSecurityScan size={40} />
             {t("landing.enterSystem")}
           </button>
@@ -203,7 +203,7 @@ export default function LandingPage() {
           <p className="cta-desc">
             {t("landing.ctaDesc")}
           </p>
-          <button className="btn btn-primary btn-lg" onClick={() => navigate("/login")}>{t("landing.accessNow")}</button>
+          <button className="btn btn-primary btn-lg" onClick={() => navigate("/signup")}>{t("landing.createAccount")}</button>
         </div>
       </section>
 

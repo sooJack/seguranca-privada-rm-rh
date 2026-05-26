@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 import { useLanguage } from "./context/LanguageContext";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 import Dashboard from "./pages/Dashboard";
 import Vigilantes from "./pages/Vigilantes";
 import Escalas from "./pages/Escalas";
@@ -97,8 +98,9 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={autenticado ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/api-docs" element={<SwaggerDocs />} />
+        <Route path="/login" element={autenticado ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/signup" element={autenticado ? <Navigate to="/dashboard" replace /> : <Signup />} />
+        <Route path="/api-docs" element={<SwaggerDocs />} />
       <Route
         path="/dashboard"
         element={

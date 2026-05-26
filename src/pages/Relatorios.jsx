@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, Input, Select, Label, Textarea } from "../components/ui";
 import { Plus, Trash2 } from "lucide-react";
+import { vigilantesService, escalasService, ocorrenciasService, postosService, riscosService, feriasService, horasExtrasService } from "../services/api";
 
 export default function Relatorios() {
   const [metricas, setMetricas] = useState({
@@ -28,21 +29,41 @@ export default function Relatorios() {
 
   const carregarDados = async () => {
     try {
-      const [metricsRes, riscosRes, feriasRes, horasRes, vigRes, postosRes] = await Promise.all([
-        fetch("/api/relatorios/metricas"),
-        fetch("/api/riscos"),
-        fetch("/api/ferias"),
-        fetch("/api/horas-extras"),
-        fetch("/api/vigilantes"),
-        fetch("/api/postos"),
+      const [riscosRes, feriasRes, horasRes, vigRes, postosRes, escalasRes, ocorrenciasRes] = await Promise.all([
+        riscosService.listar(),
+        feriasService.listar(),
+        horasExtrasService.listar(),
+        vigilantesService.listar(),
+        postosService.listar(),
+        escalasService.listar(),
+        ocorrenciasService.listar(),
       ]);
 
-      setMetricas(await metricsRes.json());
-      setRiscos(await riscosRes.json());
-      setFerias(await feriasRes.json());
-      setHorasExtras(await horasRes.json());
-      setVigilantes(await vigRes.json());
-      setPostos(await postosRes.json());
+      const vigilantesData = vigRes.data || [];
+      const postosData = postosRes.data || [];
+      const escalasData = escalasRes.data || [];
+      const ocorrenciasData = ocorrenciasRes.data || [];
+      const riscosData = riscosRes.data || [];
+      const horasData = horasRes.data || [];
+
+      setMetricas({
+        totalVigilantes: vigilantesData.length,
+        vigilantesAtivos: vigilantesData.filter(v => v.status_vigilante === 'ATIVO').length,
+        totalEscalas: escalasData.length,
+        ocorrenciasMes: ocorrenciasData.length,
+        riscos: {
+          abertos: riscosData.filter(r => r.status_risco === 'ABERTO').length,
+          mitigados: riscosData.filter(r => r.status_risco === 'MITIGADO').length,
+        },
+        horasExtras: horasData.reduce((sum, h) => sum + (h.quantidade_horas || 0), 0),
+        postosCriticos: postosData.filter(p => p.nivel_risco === 'CRITICO').length,
+      });
+
+      setRiscos(riscosData);
+      setFerias(feriasRes.data || []);
+      setHorasExtras(horasData);
+      setVigilantes(vigilantesData);
+      setPostos(postosData);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -52,15 +73,9 @@ export default function Relatorios() {
 
   const adicionarRisco = async () => {
     try {
-      const response = await fetch("/api/riscos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        setOpenModal(false);
-        carregarDados();
-      }
+      await riscosService.criar(formData);
+      setOpenModal(false);
+      carregarDados();
     } catch (error) {
       console.error("Erro:", error);
     }
@@ -69,7 +84,7 @@ export default function Relatorios() {
   const deletarRisco = async (id) => {
     if (confirm("Tem certeza?")) {
       try {
-        await fetch(`/api/riscos/${id}`, { method: "DELETE" });
+        await riscosService.excluir(id);
         carregarDados();
       } catch (error) {
         console.error("Erro:", error);
@@ -79,15 +94,9 @@ export default function Relatorios() {
 
   const adicionarFeria = async () => {
     try {
-      const response = await fetch("/api/ferias", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        setOpenModal(false);
-        carregarDados();
-      }
+      await feriasService.criar(formData);
+      setOpenModal(false);
+      carregarDados();
     } catch (error) {
       console.error("Erro:", error);
     }
@@ -96,7 +105,7 @@ export default function Relatorios() {
   const deletarFeria = async (id) => {
     if (confirm("Tem certeza?")) {
       try {
-        await fetch(`/api/ferias/${id}`, { method: "DELETE" });
+        await feriasService.excluir(id);
         carregarDados();
       } catch (error) {
         console.error("Erro:", error);

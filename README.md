@@ -124,3 +124,8 @@ curl http://localhost:3001/api/health
 # Resposta esperada:
 # {"status":"online","timestamp":"2026-05-19T..."}
 ```
+## 💻 Developers
+
+1. Arlan
+2. Filemon
+3. Jack

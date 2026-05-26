@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Badge, Dialog, Input, Select, Label } from "../components/ui";
 import { Trash2, Plus } from "lucide-react";
+import { escalasService, vigilantesService, postosService } from "../services/api";
 
 export default function Escalas() {
   const [escalas, setEscalas] = useState([]);
@@ -23,14 +24,14 @@ export default function Escalas() {
   const carregarDados = async () => {
     try {
       const [escalasRes, vigilantesRes, postosRes] = await Promise.all([
-        fetch("/api/escalas"),
-        fetch("/api/vigilantes"),
-        fetch("/api/postos"),
+        escalasService.listar(),
+        vigilantesService.listar(),
+        postosService.listar(),
       ]);
 
-      setEscalas(await escalasRes.json());
-      setVigilantes(await vigilantesRes.json());
-      setPostos(await postosRes.json());
+      setEscalas(escalasRes.data || []);
+      setVigilantes(vigilantesRes.data || []);
+      setPostos(postosRes.data || []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -40,23 +41,16 @@ export default function Escalas() {
 
   const salvar = async () => {
     try {
-      const response = await fetch("/api/escalas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await escalasService.criar(formData);
+      setOpenModal(false);
+      setFormData({
+        id_vigilante: "",
+        id_posto: "",
+        data_servico: "",
+        turno: "DIURNO",
+        horas_trabalhadas: 8,
       });
-
-      if (response.ok) {
-        setOpenModal(false);
-        setFormData({
-          id_vigilante: "",
-          id_posto: "",
-          data_servico: "",
-          turno: "DIURNO",
-          horas_trabalhadas: 8,
-        });
-        carregarDados();
-      }
+      carregarDados();
     } catch (error) {
       console.error("Erro ao salvar:", error);
     }
@@ -65,12 +59,8 @@ export default function Escalas() {
   const deletar = async (id) => {
     if (confirm("Tem certeza?")) {
       try {
-        const response = await fetch(`/api/escalas/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          carregarDados();
-        }
+        await escalasService.excluir(id);
+        carregarDados();
       } catch (error) {
         console.error("Erro ao deletar:", error);
       }
@@ -113,46 +103,90 @@ export default function Escalas() {
       {loading ? (
         <div className="text-center py-8">Carregando escalas...</div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
           {escalas.map((escala) => (
             <div
               key={escala.id_escala}
-              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+              style={{
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1.5rem',
+                backgroundColor: 'var(--bg-surface)',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'all var(--transition)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600' }}>
+                  {escala.vigilante_nome}
+                </h3>
+                <p style={{ margin: '0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  {escala.nome_posto} • {escala.empresa}
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
                 <div>
-                  <h3 className="font-semibold">{escala.vigilante_nome}</h3>
-                  <p className="text-sm text-gray-600">
-                    {escala.empresa} → {escala.posto_nome}
-                  </p>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>📅 Data</div>
+                  <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                    {new Date(escala.data_servico).toLocaleDateString('pt-BR')}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2 justify-start md:justify-end items-center">
-                  <Badge className={getTurnoColor(escala.turno)}>
-                    {escala.turno}
-                  </Badge>
-                  <Badge className={getRiscoColor(escala.nivel_risco)}>
-                    {escala.nivel_risco}
-                  </Badge>
-                  <button
-                    onClick={() => deletar(escala.id_escala)}
-                    className="p-2 hover:bg-red-50 rounded text-red-600"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>⏰ Horas</div>
+                  <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                    {escala.horas_trabalhadas}h
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600">Data</p>
-                  <p className="font-semibold">
-                    {new Date(escala.data_servico).toLocaleDateString("pt-BR")}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Horas</p>
-                  <p className="font-semibold">{escala.horas_trabalhadas}h</p>
-                </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Badge className={getTurnoColor(escala.turno)}>
+                  {escala.turno}
+                </Badge>
+                <Badge className={getRiscoColor(escala.nivel_risco)}>
+                  {escala.nivel_risco}
+                </Badge>
               </div>
+
+              <button
+                onClick={() => deletar(escala.id_escala)}
+                style={{
+                  padding: '0.75rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid rgba(209, 0, 0, 0.3)',
+                  backgroundColor: 'rgba(209, 0, 0, 0.08)',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  fontWeight: '500',
+                  transition: 'all var(--transition)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--primary)';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(209, 0, 0, 0.08)';
+                  e.currentTarget.style.color = 'var(--primary)';
+                }}
+              >
+                <Trash2 size={16} /> Deletar
+              </button>
             </div>
           ))}
         </div>

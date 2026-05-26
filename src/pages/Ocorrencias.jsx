@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Badge, Dialog, Select, Label, Textarea } from "../components/ui";
 import { Trash2, Plus } from "lucide-react";
+import { ocorrenciasService, escalasService } from "../services/api";
 
 export default function Ocorrencias() {
   const [ocorrencias, setOcorrencias] = useState([]);
@@ -20,12 +21,12 @@ export default function Ocorrencias() {
   const carregarDados = async () => {
     try {
       const [ocorrenciasRes, escalasRes] = await Promise.all([
-        fetch("/api/ocorrencias"),
-        fetch("/api/escalas"),
+        ocorrenciasService.listar(),
+        escalasService.listar(),
       ]);
 
-      setOcorrencias(await ocorrenciasRes.json());
-      setEscalas(await escalasRes.json());
+      setOcorrencias(ocorrenciasRes.data || []);
+      setEscalas(escalasRes.data || []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -35,17 +36,10 @@ export default function Ocorrencias() {
 
   const salvar = async () => {
     try {
-      const response = await fetch("/api/ocorrencias", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setOpenModal(false);
-        setFormData({ id_escala: "", descricao: "", nivel_criticidade: "BAIXA" });
-        carregarDados();
-      }
+      await ocorrenciasService.criar(formData);
+      setOpenModal(false);
+      setFormData({ id_escala: "", descricao: "", nivel_criticidade: "BAIXA" });
+      carregarDados();
     } catch (error) {
       console.error("Erro ao salvar:", error);
     }
@@ -54,12 +48,8 @@ export default function Ocorrencias() {
   const deletar = async (id) => {
     if (confirm("Tem certeza?")) {
       try {
-        const response = await fetch(`/api/ocorrencias/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          carregarDados();
-        }
+        await ocorrenciasService.excluir(id);
+        carregarDados();
       } catch (error) {
         console.error("Erro ao deletar:", error);
       }
@@ -96,50 +86,94 @@ export default function Ocorrencias() {
       {loading ? (
         <div className="text-center py-8">Carregando ocorrências...</div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
           {ocorrencias.map((ocorrencia) => {
-            const isCritica =
-              ocorrencia.nivel_criticidade === "CRITICA" ||
-              ocorrencia.nivel_criticidade === "ALTA";
-
+            const isCritica = ocorrencia.nivel_criticidade === "CRITICA" || ocorrencia.nivel_criticidade === "ALTA";
             return (
               <div
                 key={ocorrencia.id_ocorrencia}
-                className={`border rounded-lg p-4 transition-shadow ${
-                  isCritica
-                    ? "border-red-300 hover:shadow-lg hover:shadow-red-100"
-                    : "hover:shadow-md"
-                }`}
+                style={{
+                  border: isCritica ? '1px solid var(--primary)' : '1px solid var(--border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.5rem',
+                  backgroundColor: isCritica ? 'rgba(209, 0, 0, 0.05)' : 'var(--bg-surface)',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all var(--transition)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  borderLeftWidth: isCritica ? '4px' : '1px',
+                  borderLeftColor: isCritica ? 'var(--primary)' : 'var(--border)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = isCritica ? '0 4px 16px rgba(209, 0, 0, 0.2)' : 'var(--shadow-md)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
               >
-                <div className="flex justify-between items-start mb-3">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
                   <div>
-                    <h3 className="font-semibold">{ocorrencia.vigilante_nome}</h3>
-                    <p className="text-sm text-gray-600">{ocorrencia.posto_nome}</p>
+                    <h3 style={{ margin: '0 0 0.25rem 0', color: isCritica ? 'var(--primary)' : 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600' }}>
+                      {ocorrencia.vigilante_nome}
+                    </h3>
+                    <p style={{ margin: '0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                      📍 {ocorrencia.nome_posto}
+                    </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Badge className={getCriticidadeColor(ocorrencia.nivel_criticidade)}>
-                      {ocorrencia.nivel_criticidade}
-                    </Badge>
-                    <button
-                      onClick={() => deletar(ocorrencia.id_ocorrencia)}
-                      className="p-2 hover:bg-red-50 rounded text-red-600"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                  <Badge className={getCriticidadeColor(ocorrencia.nivel_criticidade)}>
+                    {ocorrencia.nivel_criticidade}
+                  </Badge>
                 </div>
 
-                <div className="mb-3">
-                  <p className="text-gray-700">{ocorrencia.descricao}</p>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: 'var(--bg-page)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.95rem',
+                  color: 'var(--text-primary)',
+                  lineHeight: '1.6',
+                }}>
+                  {ocorrencia.descricao}
                 </div>
 
-                <div className="text-xs text-gray-600 flex justify-between">
-                  <span>
-                    {new Date(ocorrencia.data_ocorrencia).toLocaleDateString("pt-BR")}{" "}
-                    {new Date(ocorrencia.data_ocorrencia).toLocaleTimeString("pt-BR")}
-                  </span>
-                  <span>{ocorrencia.turno}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  <div>
+                    📅 {new Date(ocorrencia.data_ocorrencia).toLocaleDateString('pt-BR')}{' '}
+                    {new Date(ocorrencia.data_ocorrencia).toLocaleTimeString('pt-BR')}
+                  </div>
+                  <div>🕐 {ocorrencia.turno}</div>
                 </div>
+
+                <button
+                  onClick={() => deletar(ocorrencia.id_ocorrencia)}
+                  style={{
+                    padding: '0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid rgba(209, 0, 0, 0.3)',
+                    backgroundColor: 'rgba(209, 0, 0, 0.08)',
+                    color: 'var(--primary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    fontWeight: '500',
+                    transition: 'all var(--transition)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--primary)';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(209, 0, 0, 0.08)';
+                    e.currentTarget.style.color = 'var(--primary)';
+                  }}
+                >
+                  <Trash2 size={16} /> Deletar
+                </button>
               </div>
             );
           })}
