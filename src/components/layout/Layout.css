@@ -14,6 +14,7 @@
   flex-direction: column;
   min-height: 100vh;
   transition: margin-left var(--transition);
+  overflow: hidden;
 }
 
 .layout--collapsed .layout__main { margin-left: 68px; }
@@ -21,6 +22,8 @@
 .layout__content {
   flex: 1;
   padding: 28px 28px 40px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .layout__overlay {

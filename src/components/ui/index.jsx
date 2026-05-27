@@ -123,9 +123,36 @@ export function EmptyState({ icon = "📭", title, description, action }) {
 /* ── DIALOG ──────────────────────────────────────────────────── */
 export function Dialog({ open, onOpenChange, children }) {
   if (!open) return null;
+  const overlayStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    zIndex: 50,
+    overflowY: 'auto',
+    padding: '1.5rem 1rem'
+  };
+
+  const boxStyle = {
+    background: '#000',
+    borderRadius: '0.5rem',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+    padding: '1.5rem',
+    maxWidth: '40rem',
+    width: '100%',
+    margin: '1rem auto',
+    maxHeight: 'calc(100vh - 4rem)',
+    overflowY: 'auto'
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+    <div style={overlayStyle}>
+      <div style={boxStyle}>
         {children}
       </div>
     </div>

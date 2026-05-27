@@ -46,7 +46,7 @@
 
 .field__required { color: var(--danger); margin-left: 3px; }
 
-.field__input { padding: 10px 12px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); border-radius: var(--radius-sm); }
+.field__input { padding: 10px 12px; border: 1px solid var(--border); background: black; color: white; border-radius: var(--radius-sm); }
 
 .field__input:focus { outline: none; box-shadow: 0 0 0 3px var(--border-focus); }
 

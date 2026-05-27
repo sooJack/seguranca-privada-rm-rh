@@ -170,6 +170,14 @@ select:focus {
   border-radius: 999px;
 }
 
+/* Tema Light — Forçar texto preto em todo o site */
+[data-theme="light"] {
+  --text-primary: #111111;
+  --text-secondary: #444444;
+  --text-muted: #6B7280;
+}
+
+
 .page-shell {
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;

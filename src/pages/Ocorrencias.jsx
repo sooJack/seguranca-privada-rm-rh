@@ -35,13 +35,26 @@ export default function Ocorrencias() {
   };
 
   const salvar = async () => {
+    // Validação básica
+    if (!formData.id_escala) {
+      alert("Selecione uma escala antes de registrar a ocorrência.");
+      return;
+    }
+    if (!formData.descricao || formData.descricao.trim().length < 5) {
+      alert("Descreva a ocorrência (mínimo 5 caracteres).");
+      return;
+    }
+
     try {
       await ocorrenciasService.criar(formData);
+      alert("Ocorrência registrada com sucesso.");
       setOpenModal(false);
       setFormData({ id_escala: "", descricao: "", nivel_criticidade: "BAIXA" });
       carregarDados();
     } catch (error) {
       console.error("Erro ao salvar:", error);
+      const msg = error?.response?.data?.message || error.message || "Erro ao salvar ocorrência.";
+      alert(msg);
     }
   };
 
@@ -182,7 +195,7 @@ export default function Ocorrencias() {
 
       {/* Modal */}
       <Dialog open={openModal} onOpenChange={setOpenModal}>
-        <div className="bg-white p-6 rounded-lg max-w-md w-full mx-auto">
+        <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-auto max-h-[calc(100vh-4rem)] overflow-y-auto pb-6">
           <h2 className="text-xl font-bold mb-4">Nova Ocorrência</h2>
 
           <div className="space-y-3">
