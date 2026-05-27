@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { db, testConnection } from './database.js';
+import { db, testConnection, isFallback } from './database.js';
+import { createSession, deleteSession, getSession } from './session.js';
 import routes from './routes.js';
 
 dotenv.config();
@@ -115,24 +116,18 @@ app.get('/api/openapi.json', (req, res) => {
 app.get('/api/health', async (req, res) => {
   try {
     const connected = await testConnection();
-    if (!connected) {
-      return res.status(503).json({
-        status: 'offline',
-        error: 'Banco de dados não está acessível',
-        config: {
-          host: process.env.DB_HOST || 'localhost',
-          user: process.env.DB_USER || 'root',
-          database: process.env.DB_NAME || 'seguranca_privada',
-          port: process.env.DB_PORT || 3306
-        },
-        solucao: 'Verifique se MySQL está rodando e se as credenciais em .env estão corretas'
-      });
-    }
+    const status = isFallback() ? 'fallback' : 'online';
+    const message = isFallback()
+      ? 'MySQL indisponível. Usando fallback SQLite local.'
+      : 'Conexão com MySQL estabelecida.';
+
     res.json({
-      status: 'online',
+      status,
+      message,
       timestamp: new Date().toISOString(),
       config: {
-        database: process.env.DB_NAME || 'seguranca_privada'
+        database: process.env.DB_NAME || 'seguranca_privada',
+        fallback: isFallback()
       }
     });
   } catch (error) {
@@ -185,15 +180,58 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ mensagem: 'Nome ou CPF não encontrados. Verifique seus dados.' });
     }
 
-    const usuario = rows[0];
+    const row = rows[0];
+    const userCargo = String(row.cargo || '').trim().toLowerCase();
+    const userName = String(row.nome || '').trim().toLowerCase();
+    const userCpf = String(row.cpf || '').trim();
+
+    const adminCpfs = (process.env.ADMIN_CPF || '').split(',').map((item) => item.trim()).filter(Boolean);
+    const adminNames = (process.env.ADMIN_NAME || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
+
+    const isAdmin =
+      userCargo === 'adm ultimate' ||
+      userCargo === 'adm' ||
+      userCargo === 'admin' ||
+      userCargo === 'administrator' ||
+      adminCpfs.includes(userCpf) ||
+      adminNames.includes(userName);
+
+    const usuario = {
+      ...row,
+      cargo: isAdmin ? 'ADM ULTIMATE' : row.cargo || 'Vigilante'
+    };
+    const token = `token-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    createSession(token, usuario);
+
     return res.json({
-      token: 'token-falso-para-desenvolvimento',
+      token,
       usuario
     });
   } catch (error) {
     console.error('❌ Erro no login:', error.message);
     res.status(500).json({ mensagem: 'Erro interno no login.', detalhe: error.message });
   }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace('Bearer ', '');
+  if (token) {
+    deleteSession(token);
+  }
+  res.json({ mensagem: 'Logout realizado com sucesso.' });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace('Bearer ', '');
+  const usuario = getSession(token);
+
+  if (!usuario) {
+    return res.status(401).json({ mensagem: 'Sessão não encontrada ou token inválido.' });
+  }
+
+  res.json(usuario);
 });
 
 // Rota 404
@@ -245,12 +283,16 @@ const startServer = async () => {
   }
 
   app.listen(PORT, () => {
-    console.log('✅ Conectado ao banco de dados!');
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
     console.log(`📚 API Endpoints disponíveis em http://localhost:${PORT}/api`);
     console.log(`📄 Swagger UI local: http://localhost:${PORT}/api-docs`);
     console.log(`📘 OpenAPI JSON: http://localhost:${PORT}/api/openapi.json`);
     console.log(`🌐 Frontend: ${FRONTEND_URL}/`);
+    if (isFallback()) {
+      console.log('⚠️ Rodando em modo fallback SQLite. MySQL não está disponível.');
+    } else {
+      console.log('✅ Conectado ao MySQL!');
+    }
     console.log('');
   });
 };

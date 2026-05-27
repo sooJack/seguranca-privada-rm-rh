@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Badge, Dialog, Input, Select, Label } from "../components/ui";
 import { Trash2, Plus, Edit2 } from "lucide-react";
+import { postosService, clientesService } from "../services/api";
 
 export default function Rondas() {
   const [postos, setPostos] = useState([]);
@@ -22,12 +23,12 @@ export default function Rondas() {
   const carregarDados = async () => {
     try {
       const [postosRes, clientesRes] = await Promise.all([
-        fetch("/api/postos"),
-        fetch("/api/clientes"),
+        postosService.listar(),
+        clientesService.listar(),
       ]);
 
-      setPostos(await postosRes.json());
-      setClientes(await clientesRes.json());
+      setPostos(postosRes.data || []);
+      setClientes(clientesRes.data || []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {

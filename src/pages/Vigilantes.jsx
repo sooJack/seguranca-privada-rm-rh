@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Badge, Dialog, Button, Input, Select, Label } from "../components/ui";
+import { Badge, Dialog, Input, Select, Label } from "../components/ui";
 import { Trash2, Edit2, Plus } from "lucide-react";
 import { vigilantesService } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function Vigilantes() {
+  const { usuario } = useAuth();
   const [vigilantes, setVigilantes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -15,6 +17,15 @@ export default function Vigilantes() {
     nivel_treinamento: "BASICO",
     status_vigilante: "ATIVO",
   });
+
+  const cargoAtual = usuario?.cargo?.toString().toLowerCase() || "";
+  const isAdmin = cargoAtual === "adm ultimate" || cargoAtual === "adm" || cargoAtual === "admin" || cargoAtual === "administrator";
+
+  const podeEditar = (vigilante) => isAdmin || vigilante.id_vigilante === usuario?.id_vigilante;
+  const podeDeletar = (vigilante) => isAdmin || vigilante.id_vigilante === usuario?.id_vigilante;
+  const vigilantesVisiveis = isAdmin
+    ? vigilantes
+    : vigilantes.filter((vigilante) => Number(vigilante.id_vigilante) === Number(usuario?.id_vigilante));
 
   // Carregar vigilantes
   useEffect(() => {
@@ -105,21 +116,32 @@ export default function Vigilantes() {
             <h1>Vigilantes</h1>
             <p>Cadastro, filtros e status de vigilantes carregados no sistema.</p>
           </div>
-          <button
-            onClick={abrirNovoModal}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Plus size={20} /> Novo
-          </button>
+          {isAdmin ? (
+            <button
+              onClick={abrirNovoModal}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <Plus size={20} /> Novo
+            </button>
+          ) : (
+            <div className="text-sm text-gray-500">
+              Apenas administradores veem e cadastram outros vigilantes.
+            </div>
+          )}
         </div>
       </section>
 
       {loading ? (
         <div className="text-center py-8">Carregando vigilantes...</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-          {vigilantes.map((vigilante) => (
-            <div
+        <>
+          {!isAdmin && (
+            <div className="mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+            {vigilantesVisiveis.map((vigilante) => (
+              <div
               key={vigilante.id_vigilante}
               style={{
                 border: '1px solid var(--border)',
@@ -161,66 +183,71 @@ export default function Vigilantes() {
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                <button
-                  onClick={() => editar(vigilante)}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--bg-page)',
-                    color: 'var(--text-primary)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    fontWeight: '500',
-                    transition: 'all var(--transition)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--primary)';
-                    e.currentTarget.style.color = 'white';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--bg-page)';
-                    e.currentTarget.style.color = 'var(--text-primary)';
-                  }}
-                >
-                  <Edit2 size={16} /> Editar
-                </button>
-                <button
-                  onClick={() => deletar(vigilante.id_vigilante)}
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid rgba(209, 0, 0, 0.3)',
-                    backgroundColor: 'rgba(209, 0, 0, 0.08)',
-                    color: 'var(--primary)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    fontWeight: '500',
-                    transition: 'all var(--transition)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--primary)';
-                    e.currentTarget.style.color = 'white';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(209, 0, 0, 0.08)';
-                    e.currentTarget.style.color = 'var(--primary)';
-                  }}
-                >
-                  <Trash2 size={16} /> Deletar
-                </button>
+                {podeEditar(vigilante) && (
+                  <button
+                    onClick={() => editar(vigilante)}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--bg-page)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      fontWeight: '500',
+                      transition: 'all var(--transition)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--primary)';
+                      e.currentTarget.style.color = 'white';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--bg-page)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                    }}
+                  >
+                    <Edit2 size={16} /> Editar
+                  </button>
+                )}
+                {podeDeletar(vigilante) && (
+                  <button
+                    onClick={() => deletar(vigilante.id_vigilante)}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid rgba(209, 0, 0, 0.3)',
+                      backgroundColor: 'rgba(209, 0, 0, 0.08)',
+                      color: 'var(--primary)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      fontWeight: '500',
+                      transition: 'all var(--transition)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--primary)';
+                      e.currentTarget.style.color = 'white';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(209, 0, 0, 0.08)';
+                      e.currentTarget.style.color = 'var(--primary)';
+                    }}
+                  >
+                    <Trash2 size={16} /> Deletar
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
+      </>
       )}
 
       {/* Modal */}

@@ -1,0 +1,20 @@
+{
+  "vigilantes": [],
+  "clientes": [],
+  "postos": [],
+  "escalas": [],
+  "ocorrencias": [],
+  "gestao_risco_rm": [],
+  "ferias": [],
+  "horas_extras": [],
+  "nextId": {
+    "vigilantes": 1,
+    "clientes": 1,
+    "postos": 1,
+    "escalas": 1,
+    "ocorrencias": 1,
+    "gestao_risco_rm": 1,
+    "ferias": 1,
+    "horas_extras": 1
+  }
+}

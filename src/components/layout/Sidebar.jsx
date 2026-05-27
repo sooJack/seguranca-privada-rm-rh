@@ -61,7 +61,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen }) {
           <div className="sidebar__avatar">{usuario?.nome ? usuario.nome.slice(0, 2).toUpperCase() : "US"}</div>
           <div className="sidebar__user-info">
             <div className="sidebar__user-name">{usuario?.nome || "Usuário"}</div>
-            <div className="sidebar__user-role">{usuario?.cargo || "Administrador"}</div>
+            <div className="sidebar__user-role">{usuario?.cargo || "Vigilante"}</div>
           </div>
         </div>
         <button className="sidebar__logout" onClick={handleLogout}>{t("login.logout")}</button>

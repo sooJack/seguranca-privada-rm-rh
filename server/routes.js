@@ -1,5 +1,6 @@
 import express from 'express';
 import { db } from './database.js';
+import { authMiddleware, isAdminUser } from './session.js';
 
 const router = express.Router();
 
@@ -7,9 +8,19 @@ const router = express.Router();
 // VIGILANTES
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get('/vigilantes', async (req, res) => {
+router.get('/vigilantes', authMiddleware, async (req, res) => {
   try {
     const connection = await db.getConnection();
+
+    if (!isAdminUser(req.usuario)) {
+      const [rows] = await connection.query(
+        'SELECT * FROM vigilantes WHERE id_vigilante = ? ORDER BY nome',
+        [req.usuario.id_vigilante]
+      );
+      connection.release();
+      return res.json(rows);
+    }
+
     const [rows] = await connection.query('SELECT * FROM vigilantes ORDER BY nome');
     connection.release();
     res.json(rows);
@@ -18,10 +29,16 @@ router.get('/vigilantes', async (req, res) => {
   }
 });
 
-router.get('/vigilantes/:id', async (req, res) => {
+router.get('/vigilantes/:id', authMiddleware, async (req, res) => {
   try {
+    const vigilanteId = Number(req.params.id);
+
+    if (!isAdminUser(req.usuario) && vigilanteId !== Number(req.usuario.id_vigilante)) {
+      return res.status(403).json({ error: 'Acesso negado.' });
+    }
+
     const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM vigilantes WHERE id_vigilante = ?', [req.params.id]);
+    const [rows] = await connection.query('SELECT * FROM vigilantes WHERE id_vigilante = ?', [vigilanteId]);
     connection.release();
     if (rows.length === 0) return res.status(404).json({ error: 'Não encontrado' });
     res.json(rows[0]);
@@ -47,13 +64,18 @@ router.post('/vigilantes', async (req, res) => {
   }
 });
 
-router.put('/vigilantes/:id', async (req, res) => {
+router.put('/vigilantes/:id', authMiddleware, async (req, res) => {
   try {
+    const vigilanteId = Number(req.params.id);
+    if (!isAdminUser(req.usuario) && vigilanteId !== Number(req.usuario.id_vigilante)) {
+      return res.status(403).json({ error: 'Acesso negado.' });
+    }
+
     const { nome, cpf, telefone, nivel_treinamento, status_vigilante } = req.body;
     const connection = await db.getConnection();
     await connection.query(
       'UPDATE vigilantes SET nome = ?, cpf = ?, telefone = ?, nivel_treinamento = ?, status_vigilante = ? WHERE id_vigilante = ?',
-      [nome, cpf, telefone, nivel_treinamento, status_vigilante, req.params.id]
+      [nome, cpf, telefone, nivel_treinamento, status_vigilante, vigilanteId]
     );
     connection.release();
     res.json({ success: true });
@@ -62,10 +84,15 @@ router.put('/vigilantes/:id', async (req, res) => {
   }
 });
 
-router.delete('/vigilantes/:id', async (req, res) => {
+router.delete('/vigilantes/:id', authMiddleware, async (req, res) => {
   try {
+    const vigilanteId = Number(req.params.id);
+    if (!isAdminUser(req.usuario) && vigilanteId !== Number(req.usuario.id_vigilante)) {
+      return res.status(403).json({ error: 'Acesso negado.' });
+    }
+
     const connection = await db.getConnection();
-    await connection.query('DELETE FROM vigilantes WHERE id_vigilante = ?', [req.params.id]);
+    await connection.query('DELETE FROM vigilantes WHERE id_vigilante = ?', [vigilanteId]);
     connection.release();
     res.json({ success: true });
   } catch (error) {
