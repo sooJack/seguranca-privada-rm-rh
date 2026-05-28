@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { db, testConnection, isFallback } from './database.js';
+import { connectDB } from './mongodb.js';
 import { createSession, deleteSession, getSession } from './session.js';
-import routes from './routes.js';
+import routes from './routes-mongodb.js';
 
 dotenv.config();
 
@@ -115,29 +115,16 @@ app.get('/api/openapi.json', (req, res) => {
 // Teste de conexão
 app.get('/api/health', async (req, res) => {
   try {
-    const connected = await testConnection();
-    const status = isFallback() ? 'fallback' : 'online';
-    const message = isFallback()
-      ? 'MySQL indisponível. Usando fallback SQLite local.'
-      : 'Conexão com MySQL estabelecida.';
-
     res.json({
-      status,
-      message,
+      status: 'online',
+      message: 'Conectado ao MongoDB Atlas',
       timestamp: new Date().toISOString(),
-      config: {
-        database: process.env.DB_NAME || 'seguranca_privada',
-        fallback: isFallback()
-      }
+      database: 'MongoDB'
     });
   } catch (error) {
     res.status(503).json({
       status: 'erro',
-      error: error.message,
-      config: {
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root'
-      }
+      error: error.message
     });
   }
 });
@@ -145,21 +132,15 @@ app.get('/api/health', async (req, res) => {
 // Teste simples de conexão
 app.get('/api/test', async (req, res) => {
   try {
-    const connection = await db.getConnection();
-    const [result] = await connection.query('SELECT 1 as test');
-    connection.release();
     res.json({
       sucesso: true,
-      mensagem: 'Conexão com banco de dados funcionando!',
-      resultado: result
+      mensagem: 'Conexão com MongoDB funcionando!'
     });
   } catch (error) {
     console.error('❌ Erro no teste:', error.message);
     res.status(500).json({
       sucesso: false,
-      erro: error.message,
-      codigo: error.code,
-      dica: 'MySQL está rodando? Banco seguranca_privada existe? Verifique .env'
+      erro: error.message
     });
   }
 });
@@ -276,9 +257,11 @@ app.use((req, res) => {
 });
 
 const startServer = async () => {
-  const connected = await testConnection();
-  if (!connected) {
-    console.error('⛔ Falha ao conectar ao banco de dados. O servidor não será iniciado.');
+  try {
+    await connectDB();
+    console.log('✅ Conectado ao MongoDB!');
+  } catch (error) {
+    console.error('❌ Falha ao conectar ao MongoDB. O servidor não será iniciado.');
     process.exit(1);
   }
 
@@ -288,11 +271,6 @@ const startServer = async () => {
     console.log(`📄 Swagger UI local: http://localhost:${PORT}/api-docs`);
     console.log(`📘 OpenAPI JSON: http://localhost:${PORT}/api/openapi.json`);
     console.log(`🌐 Frontend: ${FRONTEND_URL}/`);
-    if (isFallback()) {
-      console.log('⚠️ Rodando em modo fallback SQLite. MySQL não está disponível.');
-    } else {
-      console.log('✅ Conectado ao MySQL!');
-    }
     console.log('');
   });
 };
