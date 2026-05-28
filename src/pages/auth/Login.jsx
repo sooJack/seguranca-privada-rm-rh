@@ -3,10 +3,9 @@
 // Tela de login com validação e feedback visual
 // ============================================================
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SiStackhawk } from "react-icons/si";
-import { FaLightbulb } from "react-icons/fa";
 import { Lightbulb, LightbulbFilament } from "phosphor-react";
 import { LiaFlagUsaSolid } from "react-icons/lia";
 import { GiBrazilFlag } from "react-icons/gi";
@@ -25,6 +24,8 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const isEnglish = language === "en-US";
+
+  const handleGoHome = () => navigate('/');
 
   const [form, setForm] = useState({
     nome: location.state?.nome || "",
@@ -115,6 +116,16 @@ export default function Login() {
             className="login__btn"
           >
             {t("login.login")}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            onClick={handleGoHome}
+            className="login__btn login__btn-secondary"
+            style={{ marginTop: '1rem' }}
+          >
+            Voltar à Página Inicial
           </Button>
         </form>
 

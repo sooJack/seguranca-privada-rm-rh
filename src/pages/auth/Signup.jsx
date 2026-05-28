@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { vigilantesService } from "../../services/api";
-import { Mail, User, Phone, FileText, Eye, EyeOff, Lock } from "lucide-react";
+import { Mail, User, Phone, FileText } from "lucide-react";
 import { BsPeople } from "react-icons/bs";
 import { SiFuturelearn } from "react-icons/si";
 import "./Login.css";
@@ -11,7 +11,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+
+  const handleGoHome = () => navigate('/');
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -328,6 +329,23 @@ export default function Signup() {
             className="signup-btn"
           >
             {loading ? "Criando conta..." : "Criar Conta"}
+          </button>
+          <button
+            type="button"
+            onClick={handleGoHome}
+            style={{
+              width: "100%",
+              padding: "0.9rem 1rem",
+              borderRadius: "var(--radius-md)",
+              border: "1px solid var(--landing-border)",
+              background: "transparent",
+              color: "var(--landing-text)",
+              fontWeight: "700",
+              cursor: "pointer",
+              marginTop: "0.75rem"
+            }}
+          >
+            Voltar à Página Inicial
           </button>
 
           {/* Link para Login */}
