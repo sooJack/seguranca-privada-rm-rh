@@ -34,12 +34,21 @@ export default function Escalas() {
       setPostos(postosRes.data || []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
+      const msg = error?.response?.data?.mensagem || error?.response?.data?.error || error.message;
+      // Aviso simples para o usuário (ex: autenticação necessária)
+      alert('Erro ao carregar dados: ' + msg);
     } finally {
       setLoading(false);
     }
   };
 
   const salvar = async () => {
+    // Validações básicas
+    if (!formData.id_vigilante || !formData.id_posto || !formData.data_servico) {
+      alert('Preencha vigilante, posto e data antes de salvar.');
+      return;
+    }
+
     try {
       await escalasService.criar(formData);
       setOpenModal(false);
@@ -53,6 +62,8 @@ export default function Escalas() {
       carregarDados();
     } catch (error) {
       console.error("Erro ao salvar:", error);
+      const msg = error?.response?.data?.error || error?.message || 'Erro ao salvar escala.';
+      alert(msg);
     }
   };
 

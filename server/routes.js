@@ -67,16 +67,6 @@ router.get('/auth/me', authMiddleware, (req, res) => {
 router.get('/vigilantes', authMiddleware, async (req, res) => {
   try {
     const connection = await db.getConnection();
-
-    if (!isAdminUser(req.usuario)) {
-      const [rows] = await connection.query(
-        'SELECT * FROM vigilantes WHERE id_vigilante = ? ORDER BY nome',
-        [req.usuario.id_vigilante]
-      );
-      connection.release();
-      return res.json(rows);
-    }
-
     const [rows] = await connection.query('SELECT * FROM vigilantes ORDER BY nome');
     connection.release();
     res.json(rows);
@@ -410,6 +400,46 @@ router.delete('/ocorrencias/:id', async (req, res) => {
   }
 });
 
+router.get('/ocorrencias/:id', async (req, res) => {
+  try {
+    const connection = await db.getConnection();
+    const sql = `
+      SELECT 
+        o.*,
+        v.nome as vigilante_nome,
+        p.nome_posto,
+        e.turno
+      FROM ocorrencias o
+      JOIN escalas e ON o.id_escala = e.id_escala
+      JOIN vigilantes v ON e.id_vigilante = v.id_vigilante
+      JOIN postos p ON e.id_posto = p.id_posto
+      WHERE o.id_ocorrencia = ?
+      LIMIT 1
+    `;
+    const [rows] = await connection.query(sql, [req.params.id]);
+    connection.release();
+    if (rows.length === 0) return res.status(404).json({ error: 'Não encontrado' });
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/ocorrencias/:id', async (req, res) => {
+  try {
+    const { id_escala, descricao, nivel_criticidade } = req.body;
+    const connection = await db.getConnection();
+    await connection.query(
+      'UPDATE ocorrencias SET id_escala = ?, descricao = ?, nivel_criticidade = ? WHERE id_ocorrencia = ?',
+      [id_escala, descricao, nivel_criticidade, req.params.id]
+    );
+    connection.release();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // FÉRIAS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -462,6 +492,42 @@ router.delete('/ferias/:id', async (req, res) => {
   }
 });
 
+router.get('/ferias/:id', async (req, res) => {
+  try {
+    const connection = await db.getConnection();
+    const sql = `
+      SELECT 
+        f.*, 
+        v.nome as vigilante_nome
+      FROM ferias f
+      JOIN vigilantes v ON f.id_vigilante = v.id_vigilante
+      WHERE f.id_ferias = ?
+      LIMIT 1
+    `;
+    const [rows] = await connection.query(sql, [req.params.id]);
+    connection.release();
+    if (rows.length === 0) return res.status(404).json({ error: 'Não encontrado' });
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/ferias/:id', async (req, res) => {
+  try {
+    const { id_vigilante, data_inicio, data_fim } = req.body;
+    const connection = await db.getConnection();
+    await connection.query(
+      'UPDATE ferias SET id_vigilante = ?, data_inicio = ?, data_fim = ? WHERE id_ferias = ?',
+      [id_vigilante, data_inicio, data_fim, req.params.id]
+    );
+    connection.release();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════════════
 // HORAS EXTRAS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -507,6 +573,42 @@ router.delete('/horas-extras/:id', async (req, res) => {
   try {
     const connection = await db.getConnection();
     await connection.query('DELETE FROM horas_extras WHERE id_extra = ?', [req.params.id]);
+    connection.release();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/horas-extras/:id', async (req, res) => {
+  try {
+    const connection = await db.getConnection();
+    const sql = `
+      SELECT 
+        h.*, 
+        v.nome as vigilante_nome
+      FROM horas_extras h
+      JOIN vigilantes v ON h.id_vigilante = v.id_vigilante
+      WHERE h.id_extra = ?
+      LIMIT 1
+    `;
+    const [rows] = await connection.query(sql, [req.params.id]);
+    connection.release();
+    if (rows.length === 0) return res.status(404).json({ error: 'Não encontrado' });
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/horas-extras/:id', async (req, res) => {
+  try {
+    const { id_vigilante, quantidade_horas, motivo, data_extra } = req.body;
+    const connection = await db.getConnection();
+    await connection.query(
+      'UPDATE horas_extras SET id_vigilante = ?, quantidade_horas = ?, motivo = ?, data_extra = ? WHERE id_extra = ?',
+      [id_vigilante, quantidade_horas, motivo, data_extra, req.params.id]
+    );
     connection.release();
     res.json({ success: true });
   } catch (error) {

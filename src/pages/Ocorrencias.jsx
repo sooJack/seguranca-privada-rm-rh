@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge, Dialog, Select, Label, Textarea } from "../components/ui";
 import { Trash2, Plus } from "lucide-react";
-import { ocorrenciasService, escalasService } from "../services/api";
+import { ocorrenciasService, escalasService, vigilantesService } from "../services/api";
 
 export default function Ocorrencias() {
   const [ocorrencias, setOcorrencias] = useState([]);
@@ -13,6 +14,8 @@ export default function Ocorrencias() {
     descricao: "",
     nivel_criticidade: "BAIXA",
   });
+  const [vigilantes, setVigilantes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     carregarDados();
@@ -20,13 +23,15 @@ export default function Ocorrencias() {
 
   const carregarDados = async () => {
     try {
-      const [ocorrenciasRes, escalasRes] = await Promise.all([
+      const [ocorrenciasRes, escalasRes, vigilantesRes] = await Promise.all([
         ocorrenciasService.listar(),
         escalasService.listar(),
+        vigilantesService.listar(),
       ]);
 
       setOcorrencias(ocorrenciasRes.data || []);
       setEscalas(escalasRes.data || []);
+      setVigilantes(vigilantesRes.data || []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -66,7 +71,16 @@ export default function Ocorrencias() {
       } catch (error) {
         console.error("Erro ao deletar:", error);
       }
+
     }
+  };
+
+  const getVigilantesSemEscala = () => {
+    return vigilantes.filter((vigilante) =>
+      !escalas.some(
+        (escala) => Number(escala.id_vigilante) === Number(vigilante.id_vigilante)
+      )
+    );
   };
 
   const getCriticidadeColor = (criticidade) => {
@@ -88,7 +102,7 @@ export default function Ocorrencias() {
             <p>Registre eventos e acompanhe o histórico de ocorrências em tempo real.</p>
           </div>
           <button
-            onClick={() => setOpenModal(true)}
+            onClick={async () => { await carregarDados(); setOpenModal(true); }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <Plus size={20} /> Nova Ocorrência
@@ -210,7 +224,7 @@ export default function Ocorrencias() {
                 <option value="">Selecione...</option>
                 {escalas.map((e) => (
                   <option key={e.id_escala} value={e.id_escala}>
-                    {e.vigilante_nome} - {e.posto_nome}
+                    {e.vigilante_nome} - {e.nome_posto}
                   </option>
                 ))}
               </Select>
