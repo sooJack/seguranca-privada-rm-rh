@@ -2,9 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { connectDB } from './mongodb.js';
-import { createSession, deleteSession, getSession } from './session.js';
-import routes from './routes-mongodb.js';
+import routes from './routes.js';
 
 dotenv.config();
 
@@ -117,9 +115,9 @@ app.get('/api/health', async (req, res) => {
   try {
     res.json({
       status: 'online',
-      message: 'Conectado ao MongoDB Atlas',
+      message: 'Conectado ao MySQL',
       timestamp: new Date().toISOString(),
-      database: 'MongoDB'
+      database: 'MySQL'
     });
   } catch (error) {
     res.status(503).json({
@@ -134,7 +132,7 @@ app.get('/api/test', async (req, res) => {
   try {
     res.json({
       sucesso: true,
-      mensagem: 'Conexão com MongoDB funcionando!'
+      mensagem: 'Conexão com MySQL funcionando!'
     });
   } catch (error) {
     console.error('❌ Erro no teste:', error.message);
@@ -143,76 +141,6 @@ app.get('/api/test', async (req, res) => {
       erro: error.message
     });
   }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { nome, cpf } = req.body;
-
-    if (!nome || !cpf) {
-      return res.status(400).json({ mensagem: 'Nome e CPF são obrigatórios.' });
-    }
-
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM vigilantes WHERE nome = ? AND cpf = ?', [nome, cpf]);
-    connection.release();
-
-    if (rows.length === 0) {
-      return res.status(401).json({ mensagem: 'Nome ou CPF não encontrados. Verifique seus dados.' });
-    }
-
-    const row = rows[0];
-    const userCargo = String(row.cargo || '').trim().toLowerCase();
-    const userName = String(row.nome || '').trim().toLowerCase();
-    const userCpf = String(row.cpf || '').trim();
-
-    const adminCpfs = (process.env.ADMIN_CPF || '').split(',').map((item) => item.trim()).filter(Boolean);
-    const adminNames = (process.env.ADMIN_NAME || '').split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
-
-    const isAdmin =
-      userCargo === 'adm ultimate' ||
-      userCargo === 'adm' ||
-      userCargo === 'admin' ||
-      userCargo === 'administrator' ||
-      adminCpfs.includes(userCpf) ||
-      adminNames.includes(userName);
-
-    const usuario = {
-      ...row,
-      cargo: isAdmin ? 'ADM ULTIMATE' : row.cargo || 'Vigilante'
-    };
-    const token = `token-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    createSession(token, usuario);
-
-    return res.json({
-      token,
-      usuario
-    });
-  } catch (error) {
-    console.error('❌ Erro no login:', error.message);
-    res.status(500).json({ mensagem: 'Erro interno no login.', detalhe: error.message });
-  }
-});
-
-app.post('/api/auth/logout', (req, res) => {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.replace('Bearer ', '');
-  if (token) {
-    deleteSession(token);
-  }
-  res.json({ mensagem: 'Logout realizado com sucesso.' });
-});
-
-app.get('/api/auth/me', (req, res) => {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.replace('Bearer ', '');
-  const usuario = getSession(token);
-
-  if (!usuario) {
-    return res.status(401).json({ mensagem: 'Sessão não encontrada ou token inválido.' });
-  }
-
-  res.json(usuario);
 });
 
 // Rota 404
@@ -257,14 +185,6 @@ app.use((req, res) => {
 });
 
 const startServer = async () => {
-  try {
-    await connectDB();
-    console.log('✅ Conectado ao MongoDB!');
-  } catch (error) {
-    console.error('❌ Falha ao conectar ao MongoDB. O servidor não será iniciado.');
-    process.exit(1);
-  }
-
   app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
     console.log(`📚 API Endpoints disponíveis em http://localhost:${PORT}/api`);

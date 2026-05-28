@@ -27,9 +27,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const requestUrl = err.config?.url || "";
+    const isLoginRequest = requestUrl.endsWith("/auth/login");
+    if (err.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      window.location.hash = "#/login";
     }
     return Promise.reject(err);
   }
