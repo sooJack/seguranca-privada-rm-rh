@@ -248,16 +248,38 @@
 .landing-hero {
   display: grid;
   gap: 32px;
-  width: calc(100% + 96px);
+  width: 100%;
   max-width: none;
-  margin-left: -48px;
-  margin-right: -48px;
-  padding: 72px 32px 56px;
-  border-radius: 32px 32px 0 0;
-  background: rgba(255, 255, 255, 0.04);
+  margin-left: 0;
+  margin-right: 0;
+  padding: 72px 48px 56px;
+  border-radius: 32px;
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--shadow);
   position: relative;
+  overflow: hidden;
+}
+
+.landing-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+[data-theme="light"] .landing-hero {
+  background: white;
+  border: 1px solid black;
+}
+
+[data-theme="light"] .landing-hero::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.15) 100%);
 }
 
 .hero-badge {
@@ -301,6 +323,18 @@
 .hero-title-line3 {
   display: block;
   color: white;
+}
+
+[data-theme="light"] .hero-title-line1 {
+  color: black;
+}
+
+[data-theme="light"] .hero-title-line2 {
+  color: black;
+}
+
+[data-theme="light"] .hero-title-line3 {
+  color: black;
 }
 
 
