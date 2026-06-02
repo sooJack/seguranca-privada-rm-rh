@@ -60,35 +60,29 @@ export default function Rondas() {
 
   const salvar = async () => {
     try {
-      const url = editingId ? `/api/postos/${editingId}` : "/api/postos";
-      const method = editingId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setOpenModal(false);
-        carregarDados();
+      if (editingId) {
+        await postosService.atualizar(editingId, formData);
+      } else {
+        await postosService.criar(formData);
       }
+      setOpenModal(false);
+      carregarDados();
     } catch (error) {
       console.error("Erro ao salvar:", error);
+      const msg = error?.response?.data?.error || error.message;
+      alert("Erro ao salvar: " + msg);
     }
   };
 
   const deletar = async (id) => {
     if (confirm("Tem certeza?")) {
       try {
-        const response = await fetch(`/api/postos/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          carregarDados();
-        }
+        await postosService.excluir(id);
+        carregarDados();
       } catch (error) {
         console.error("Erro ao deletar:", error);
+        const msg = error?.response?.data?.error || error.message;
+        alert("Erro ao deletar: " + msg);
       }
     }
   };

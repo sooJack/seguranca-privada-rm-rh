@@ -230,7 +230,7 @@ router.get('/postos', async (req, res) => {
   }
 });
 
-router.post('/postos', async (req, res) => {
+router.post('/postos', authMiddleware, async (req, res) => {
   try {
     const { nome_posto, localizacao, nivel_risco, id_cliente } = req.body;
     if (!nome_posto || !id_cliente) return res.status(400).json({ error: 'Nome e cliente obrigatórios' });
@@ -247,7 +247,7 @@ router.post('/postos', async (req, res) => {
   }
 });
 
-router.put('/postos/:id', async (req, res) => {
+router.put('/postos/:id', authMiddleware, async (req, res) => {
   try {
     const { nome_posto, localizacao, nivel_risco, id_cliente } = req.body;
     const connection = await db.getConnection();
@@ -262,7 +262,7 @@ router.put('/postos/:id', async (req, res) => {
   }
 });
 
-router.delete('/postos/:id', async (req, res) => {
+router.delete('/postos/:id', authMiddleware, async (req, res) => {
   try {
     const connection = await db.getConnection();
     await connection.query('DELETE FROM postos WHERE id_posto = ?', [req.params.id]);
