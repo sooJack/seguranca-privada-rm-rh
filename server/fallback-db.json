@@ -1,5 +1,15 @@
 {
-  "vigilantes": [],
+  "vigilantes": [
+    {
+      "id_vigilante": 1,
+      "nome": "Arlan",
+      "cpf": "666.666.666-66",
+      "telefone": "(55) 96666-6666",
+      "nivel_treinamento": "AVANCADO",
+      "status_vigilante": "ATIVO",
+      "created_at": "2026-06-01T12:57:07.469Z"
+    }
+  ],
   "clientes": [],
   "postos": [],
   "escalas": [],
@@ -8,7 +18,7 @@
   "ferias": [],
   "horas_extras": [],
   "nextId": {
-    "vigilantes": 1,
+    "vigilantes": 2,
     "clientes": 1,
     "postos": 1,
     "escalas": 1,
