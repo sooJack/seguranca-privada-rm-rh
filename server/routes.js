@@ -11,17 +11,20 @@ const router = express.Router();
 
 router.post('/auth/login', async (req, res) => {
   try {
-    const { nome, cpf } = req.body;
-    
+    let { nome, cpf } = req.body;
+
     if (!nome || !cpf) {
       return res.status(400).json({ mensagem: 'Nome e CPF são obrigatórios' });
     }
 
+    // Normalizar entrada: remover pontuação do CPF e trim do nome
+    cpf = String(cpf || '').replace(/\D/g, '');
+    nome = String(nome || '').trim();
+
     const connection = await db.getConnection();
-    const [rows] = await connection.query(
-      'SELECT * FROM vigilantes WHERE nome = ? AND cpf = ? LIMIT 1',
-      [nome, cpf]
-    );
+    // Comparar nome case-insensitive e CPF apenas com dígitos
+    const sql = `SELECT * FROM vigilantes WHERE LOWER(nome) = LOWER(?) AND REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ? LIMIT 1`;
+    const [rows] = await connection.query(sql, [nome, cpf]);
     connection.release();
 
     if (rows.length === 0) {
