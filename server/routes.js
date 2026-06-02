@@ -24,6 +24,7 @@ router.post('/auth/login', async (req, res) => {
     const connection = await db.getConnection();
     // Comparar nome case-insensitive e CPF apenas com dígitos
     const sql = `SELECT * FROM vigilantes WHERE LOWER(nome) = LOWER(?) AND REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ? LIMIT 1`;
+    console.log('SQL login:', sql, 'PARAMS:', [nome, cpf]);
     const [rows] = await connection.query(sql, [nome, cpf]);
     connection.release();
 
